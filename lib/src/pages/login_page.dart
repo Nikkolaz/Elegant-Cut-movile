@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:elegant_cut_mobile/src/pages/register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -129,8 +130,36 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            letterSpacing:
-                                2, // Le da ese toque premium al botón
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Debajo del botón de Iniciar Sesión
+                    const SizedBox(height: 20),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RegisterPage()),
+                          );
+                        },
+                        child: RichText(
+                          text: const TextSpan(
+                            text: '¿No tienes cuenta? ',
+                            style: TextStyle(color: Colors.grey),
+                            children: [
+                              TextSpan(
+                                text: 'Regístrate',
+                                style: TextStyle(
+                                  color: Color(0xFFD48B41),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
