@@ -136,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
 
-                    // Debajo del botón de Iniciar Sesión
+                    // Debajo del botón de Iniciar Sesión es el de registro 
                     const SizedBox(height: 20),
                     Center(
                       child: TextButton(

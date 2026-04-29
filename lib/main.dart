@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // Puente de la pantalla de login de la primera pantalla uwu
 import 'package:elegant_cut_mobile/src/pages/login_page.dart';
 
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
