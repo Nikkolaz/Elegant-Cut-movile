@@ -1,7 +1,6 @@
 class ApiConstants {
-  // En emulador Android, 10.0.2.2 apunta al localhost de tu PC
-  // En dispositivo físico, usa tu IP local (ej: 192.168.1.50)
-  static const String baseUrl = 'http://10.0.2.2:3001/api';
+  // Para Web/Windows usa localhost. Para Emulador Android usa 10.0.2.2
+  static const String baseUrl = 'http://172.20.10.14:3001/api';
   // Endpoints
   static const String login = '/auth/login';
   static const String register = '/auth/register';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../api/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,10 +10,78 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // 1. Controladores para capturar lo que el usuario escribe
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _secondNameController = TextEditingController();
+  final _lastName1Controller = TextEditingController();
+  final _lastName2Controller = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
+  void _handleRegister() async {
+    final email = _emailController.text.trim();
+    final username = _usernameController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final secondName = _secondNameController.text.trim();
+    final lastName1 = _lastName1Controller.text.trim();
+    final lastName2 = _lastName2Controller.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty ||
+        username.isEmpty ||
+        firstName.isEmpty ||
+        lastName1.isEmpty ||
+        password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa los campos obligatorios (*)'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await _authService.register(
+      username: username,
+      email: email,
+      firstName: firstName,
+      secondName: secondName,
+      lastName1: lastName1,
+      lastName2: lastName2,
+      phone: phone,
+      password: password,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (result['success']) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Cuenta creada con éxito!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) Navigator.pop(context);
+      });
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message']),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +118,68 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 40),
 
-              // 2. Campo de Nombre
-              _buildCustomTextField(
-                controller: _nameController,
-                hintText: 'Nombre completo',
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 20),
-
-              // 3. Campo de Correo
+              // 2. Campo de Correo
               _buildCustomTextField(
                 controller: _emailController,
-                hintText: 'Correo electrónico',
+                hintText: 'Correo electrónico *',
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
 
-              // 4. Campo de Teléfono
+              // 3. Campo de Usuario
+              _buildCustomTextField(
+                controller: _usernameController,
+                hintText: 'Nombre de usuario *',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 20),
+
+              // 4. Nombres
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildCustomTextField(
+                      controller: _firstNameController,
+                      hintText: 'Primer nombre *',
+                      icon: Icons.badge_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: _buildCustomTextField(
+                      controller: _secondNameController,
+                      hintText: 'Segundo nombre',
+                      icon: Icons.badge_outlined,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // 5. Apellidos
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildCustomTextField(
+                      controller: _lastName1Controller,
+                      hintText: 'Primer apellido *',
+                      icon: Icons.badge_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: _buildCustomTextField(
+                      controller: _lastName2Controller,
+                      hintText: 'Segundo apellido',
+                      icon: Icons.badge_outlined,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // 6. Campo de Teléfono
               _buildCustomTextField(
                 controller: _phoneController,
                 hintText: 'Teléfono',
@@ -75,10 +188,10 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 20),
 
-              // 5. Campo de Contraseña
+              // 7. Campo de Contraseña
               _buildCustomTextField(
                 controller: _passwordController,
-                hintText: 'Contraseña',
+                hintText: 'Contraseña *',
                 icon: Icons.lock_outline,
                 obscureText: true,
               ),
@@ -97,18 +210,24 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {
-                    // Aquí procesaremos los datos
-                    print('Registrando a: ${_nameController.text}');
-                  },
-                  child: const Text(
-                    'REGISTRARSE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _handleRegister,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'REGISTRARSE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
