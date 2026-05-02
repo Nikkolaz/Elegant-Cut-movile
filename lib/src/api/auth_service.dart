@@ -16,7 +16,7 @@ class AuthService {
           'username': username,
           'contrasena': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 5));
 
       final data = jsonDecode(response.body);
 
@@ -71,7 +71,7 @@ class AuthService {
           'id_rol': 2,
           'estado': true,
         }),
-      );
+      ).timeout(const Duration(seconds: 5));
 
       final data = jsonDecode(response.body);
 

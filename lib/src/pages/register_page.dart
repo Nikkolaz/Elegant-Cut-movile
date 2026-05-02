@@ -59,6 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
       password: password,
     );
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (result['success']) {
@@ -207,7 +208,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       0xFFD48B41,
                     ), // Tu Naranja Madera
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   onPressed: _isLoading ? null : _handleRegister,
@@ -249,7 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1C1C1E), // Gris oscuro como el Login
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
         controller: controller,
