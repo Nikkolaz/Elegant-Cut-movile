@@ -9,7 +9,6 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // 1. Controladores para capturar lo que el usuario escribe
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _firstNameController = TextEditingController();
@@ -32,11 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty ||
-        username.isEmpty ||
-        firstName.isEmpty ||
-        lastName1.isEmpty ||
-        password.isEmpty) {
+    if (email.isEmpty || username.isEmpty || firstName.isEmpty || lastName1.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Por favor completa los campos obligatorios (*)'),
@@ -86,152 +81,314 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.black, // Fondo oscuro Premium
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context), // Volver al Login
-        ),
-      ),
-      body: SingleChildScrollView(
-        // Para evitar errores si el teclado tapa los campos
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Crea tu\nCuenta.',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Únete a la experiencia Elegant Cut.',
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-              ),
-              const SizedBox(height: 40),
-
-              // 2. Campo de Correo
-              _buildCustomTextField(
-                controller: _emailController,
-                hintText: 'Correo electrónico *',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-
-              // 3. Campo de Usuario
-              _buildCustomTextField(
-                controller: _usernameController,
-                hintText: 'Nombre de usuario *',
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 20),
-
-              // 4. Nombres
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCustomTextField(
-                      controller: _firstNameController,
-                      hintText: 'Primer nombre *',
-                      icon: Icons.badge_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: _buildCustomTextField(
-                      controller: _secondNameController,
-                      hintText: 'Segundo nombre',
-                      icon: Icons.badge_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // 5. Apellidos
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCustomTextField(
-                      controller: _lastName1Controller,
-                      hintText: 'Primer apellido *',
-                      icon: Icons.badge_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: _buildCustomTextField(
-                      controller: _lastName2Controller,
-                      hintText: 'Segundo apellido',
-                      icon: Icons.badge_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // 6. Campo de Teléfono
-              _buildCustomTextField(
-                controller: _phoneController,
-                hintText: 'Teléfono',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 20),
-
-              // 7. Campo de Contraseña
-              _buildCustomTextField(
-                controller: _passwordController,
-                hintText: 'Contraseña *',
-                icon: Icons.lock_outline,
-                obscureText: true,
-              ),
-              const SizedBox(height: 40),
-
-              // 6. Botón de Registro
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFFD48B41,
-                    ), // Tu Naranja Madera
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: _isLoading ? null : _handleRegister,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'REGISTRARSE',
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // 1. Fondo de Burbujas (Optimizado con RepaintBoundary)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: size.height * 0.45,
+            child: RepaintBoundary(
+              child: Container(
+                color: const Color(0xFFF0F4F8),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 50),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Text(
+                          'Crear Cuenta',
                           style: TextStyle(
-                            color: Colors.white,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
+                            color: Colors.black,
                           ),
                         ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          _buildBubble(top: 10, right: 40, size: 80, color: const Color(0xFFC7B8F5)),
+                          _buildBubble(top: 40, left: 30, size: 100, color: const Color(0xFFF9A8D4)),
+                          _buildBubble(bottom: 20, right: 20, size: 110, color: const Color(0xFFBAE5F4)),
+                          _buildBubble(top: 80, left: 120, size: 90, color: const Color(0xFFD48B41).withOpacity(0.4)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 60),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
+            ),
+          ),
+
+          // 2. Draggable Scrollable Sheet
+          DraggableScrollableSheet(
+            initialChildSize: 0.65,
+            minChildSize: 0.6,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF121212) : Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    )
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Text(
+                        'Únete a la experiencia Elegant Cut',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      _buildSocialButton(
+                        icon: Icons.g_mobiledata,
+                        label: 'Register with Google',
+                        color: Colors.white,
+                        textColor: Colors.black,
+                        borderColor: Colors.grey.shade300,
+                      ),
+                      const SizedBox(height: 15),
+                      _buildSocialButton(
+                        icon: Icons.apple,
+                        label: 'Register with Apple',
+                        color: Colors.black,
+                        textColor: Colors.white,
+                      ),
+
+                      const SizedBox(height: 30),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Text('o crea tu cuenta', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                          ),
+                          Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+
+                      _buildTextField(
+                        controller: _emailController,
+                        hint: 'Correo electrónico *',
+                        icon: Icons.email_outlined,
+                        isDark: isDark,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                        controller: _usernameController,
+                        hint: 'Nombre de usuario *',
+                        icon: Icons.person_outline,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 15),
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _firstNameController,
+                              hint: 'Primer nombre *',
+                              isDark: isDark,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _secondNameController,
+                              hint: 'Segundo nombre',
+                              isDark: isDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _lastName1Controller,
+                              hint: 'Primer apellido *',
+                              isDark: isDark,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _lastName2Controller,
+                              hint: 'Segundo apellido',
+                              isDark: isDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+
+                      _buildTextField(
+                        controller: _phoneController,
+                        hint: 'Teléfono',
+                        icon: Icons.phone_outlined,
+                        isDark: isDark,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                        controller: _passwordController,
+                        hint: 'Contraseña *',
+                        icon: Icons.lock_outline,
+                        isDark: isDark,
+                        obscure: true,
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handleRegister,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD48B41),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            elevation: 0,
+                          ),
+                          child: _isLoading 
+                            ? const SizedBox(
+                                height: 20, 
+                                width: 20, 
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                              )
+                            : const Text('CREAR CUENTA', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: RichText(
+                          text: TextSpan(
+                            text: '¿Ya tienes cuenta? ',
+                            style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey),
+                            children: const [
+                              TextSpan(
+                                text: 'Inicia sesión',
+                                style: TextStyle(color: Color(0xFFD48B41), fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    IconData? icon,
+    required bool isDark,
+    bool obscure = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
+        decoration: InputDecoration(
+          prefixIcon: icon != null ? Icon(icon, color: Colors.grey, size: 20) : null,
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color textColor,
+    Color? borderColor,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 55,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(15),
+        border: borderColor != null ? Border.all(color: borderColor) : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: textColor, size: 28),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
+              ),
             ],
           ),
         ),
@@ -239,30 +396,18 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // 7. Widget helper para no repetir código de diseño en los inputs
-  Widget _buildCustomTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E), // Gris oscuro como el Login
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.grey),
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(20),
+  Widget _buildBubble({double? top, double? left, double? right, double? bottom, required double size, required Color color}) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.4),
+          shape: BoxShape.circle,
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:elegant_cut_mobile/src/pages/barber_detail_page.dart';
+import 'package:elegant_cut_mobile/src/widgets/barber_avatar_card.dart';
+import 'package:elegant_cut_mobile/src/widgets/service_card.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -369,22 +370,10 @@ class HomePage extends StatelessWidget {
   Widget _buildBarbersSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final barbers = [
-      {
-        'name': 'Marcus',
-        'rating': '4.9',
-        'img': 'https://i.pravatar.cc/150?u=1',
-      },
+      {'name': 'Marcus', 'rating': '4.9', 'img': 'https://i.pravatar.cc/150?u=1'},
       {'name': 'Alex', 'rating': '4.8', 'img': 'https://i.pravatar.cc/150?u=2'},
-      {
-        'name': 'Julian',
-        'rating': '4.7',
-        'img': 'https://i.pravatar.cc/150?u=3',
-      },
-      {
-        'name': 'Daniel',
-        'rating': '4.9',
-        'img': 'https://i.pravatar.cc/150?u=4',
-      },
+      {'name': 'Julian', 'rating': '4.7', 'img': 'https://i.pravatar.cc/150?u=3'},
+      {'name': 'Daniel', 'rating': '4.9', 'img': 'https://i.pravatar.cc/150?u=4'},
     ];
 
     return Column(
@@ -406,49 +395,7 @@ class HomePage extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             itemCount: barbers.length,
             itemBuilder: (context, index) {
-              final b = barbers[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BarberDetailPage(barber: b),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 90,
-                  margin: const EdgeInsets.only(right: 15),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'barber_image_${b['name']}',
-                        child: CircleAvatar(
-                          radius: 35,
-                          backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
-                          backgroundImage: NetworkImage(b['img']!),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        b['name']!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      Text(
-                        '⭐ ${b['rating']}',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return BarberAvatarCard(barber: barbers[index]);
             },
           ),
         ),
@@ -509,39 +456,11 @@ class HomePage extends StatelessWidget {
           itemCount: services.length,
           itemBuilder: (context, index) {
             final s = services[index];
-            return Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: s['color'] as Color,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(s['icon'] as IconData, color: isDark ? Colors.white70 : Colors.black87),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s['name'] as String,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      Text(
-                        s['price'] as String,
-                        style: TextStyle(
-                          color: isDark ? Colors.white60 : Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            return ServiceCard(
+              name: s['name'] as String,
+              price: s['price'] as String,
+              icon: s['icon'] as IconData,
+              color: s['color'] as Color,
             );
           },
         ),
