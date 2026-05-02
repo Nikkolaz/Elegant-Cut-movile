@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:elegant_cut_mobile/src/pages/register_page.dart';
+import 'package:elegant_cut_mobile/src/pages/index_page.dart';
 import '../api/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -36,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final result = await _authService.login(username, password);
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (result['success']) {
@@ -46,8 +48,10 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.green,
         ),
       );
-      // Aquí podrías navegar a la pantalla principal
-      // Navigator.pushReplacement(...)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const IndexPage()),
+      );
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,12 +66,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // A los 2 segundos, actualizamos el estado para encender el formulario
-    Future.delayed(const Duration(seconds: 2), () {
-      // Usamos setState que sí existe aquí dentro de _LoginPageState
-      setState(() {
-        _mostrarFormulario = true;
-      });
+    // Iniciamos la animación del formulario casi de inmediato para un efecto fluido
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _mostrarFormulario = true;
+        });
+      }
     });
   }
 
@@ -76,155 +81,159 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Título imponente (Este SIEMPRE se ve)
-              const Text(
-                'Elegant\nCut.',
-                style: TextStyle(
-                  fontSize: 54,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // 2. El Formulario Animado
-              AnimatedOpacity(
-                duration: const Duration(
-                  milliseconds: 1500,
-                ), // Tarda 1.5s en aparecer
-                opacity: _mostrarFormulario ? 1.0 : 0.0,
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Reserva tu estilo.',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                    const SizedBox(height: 50),
-
-                    // Input de Usuario Mágico!
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1C1C1E),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: TextField(
-                        controller: _usernameController,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                        decoration: const InputDecoration(
-                          hintText: 'Nombre de usuario',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(22),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 2. El Formulario Animado (Ahora incluye el título)
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 1500),
+                    opacity: _mostrarFormulario ? 1.0 : 0.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. Título imponente
+                        const Text(
+                          'Elegant\nCut.',
+                          style: TextStyle(
+                            fontSize: 54,
+                            fontWeight: FontWeight.w900,
+                            height: 1.1,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Input de Contraseña (Código Dos)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1C1C1E),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: true, // Oculta las letras
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                        decoration: const InputDecoration(
-                          hintText: 'Contraseña',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(22),
+                        const SizedBox(height: 15),
+                        Text(
+                          'Reserva tu estilo.',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey.shade500,
+                          ),
                         ),
-                      ),
-                    ),
+                        const SizedBox(height: 50),
 
-                    const SizedBox(height: 40),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 60,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xFFD48B41,
-                          ), // Naranja Madera
-                          foregroundColor: Colors.white, // Color de texto
-                          shape: RoundedRectangleBorder(
+                        // Input de Usuario Mágico!
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C1C1E),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          elevation:
-                              0, // Las apps modernas de iOS no usan sombra aquí
-                        ),
-                        onPressed: _isLoading ? null : _handleLogin,
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'INICIAR SESIÓN',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    // Debajo del botón de Iniciar Sesión es el de registro 
-                    const SizedBox(height: 20),
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const RegisterPage()),
-                          );
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            text: '¿No tienes cuenta? ',
-                            style: TextStyle(color: Colors.grey),
-                            children: [
-                              TextSpan(
-                                text: 'Regístrate',
-                                style: TextStyle(
-                                  color: Color(0xFFD48B41),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          child: TextField(
+                            controller: _usernameController,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Nombre de usuario',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.all(22),
+                            ),
                           ),
                         ),
-                      ),
+
+                        const SizedBox(height: 20),
+
+                        // Input de Contraseña (Código Dos)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C1C1E),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: TextField(
+                            controller: _passwordController,
+                            obscureText: true, // Oculta las letras
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Contraseña',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.all(22),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(
+                                0xFFD48B41,
+                              ), // Naranja Madera
+                              foregroundColor: Colors.white, // Color de texto
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation:
+                                  0, // Las apps modernas de iOS no usan sombra aquí
+                            ),
+                            onPressed: _isLoading ? null : _handleLogin,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'INICIAR SESIÓN',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        // Debajo del botón de Iniciar Sesión es el de registro
+                        const SizedBox(height: 20),
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
+                                ),
+                              );
+                            },
+                            child: RichText(
+                              text: const TextSpan(
+                                text: '¿No tienes cuenta? ',
+                                style: TextStyle(color: Colors.grey),
+                                children: [
+                                  TextSpan(
+                                    text: 'Regístrate',
+                                    style: TextStyle(
+                                      color: Color(0xFFD48B41),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
