@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:elegant_cut_mobile/src/pages/home_page.dart';
 import 'package:elegant_cut_mobile/src/pages/profile_page.dart';
+import 'package:elegant_cut_mobile/src/pages/appointments_page.dart';
+
+import 'package:elegant_cut_mobile/src/pages/barbers_page.dart';
+import 'package:elegant_cut_mobile/src/pages/shop_page.dart';
+
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
@@ -21,11 +26,13 @@ class _IndexPageState extends State<IndexPage> {
   void initState() {
     super.initState();
     _pages = [
-      const HomePage(),
-      const _DummyPage(title: 'Mis Citas'),
-      const _DummyPage(title: 'Tienda'),
-      const _DummyPage(title: 'Notificaciones'),
-      const ProfilePage(),
+      HomePage(),
+      const AppointmentsPage(),
+      const ShopPage(),
+
+      const BarbersPage(),
+
+      ProfilePage(),
     ];
   }
 
@@ -98,11 +105,10 @@ class _IndexPageState extends State<IndexPage> {
                             _buildNavItem(context, Icons.storefront, 'Tienda', 2, selectedIndex),
                             _buildNavItem(
                               context,
-                              Icons.notifications,
-                              'Notificaciones',
+                              Icons.face_retouching_natural,
+                              'Barberos',
                               3,
                               selectedIndex,
-                              badgeCount: 2,
                             ),
                             _buildNavItem(context, Icons.person, 'Perfil', 4, selectedIndex),
                           ],

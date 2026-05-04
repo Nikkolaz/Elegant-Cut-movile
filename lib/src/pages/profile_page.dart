@@ -1,11 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/src/pages/settings_page.dart';
 import 'package:elegant_cut_mobile/src/pages/login_page.dart';
 import 'package:elegant_cut_mobile/src/widgets/summary_card.dart';
 import 'package:elegant_cut_mobile/src/widgets/profile_menu_item.dart';
+import '../widgets/carita_widget.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String _firstName = 'Usuario';
+  String _username = '';
+  String _email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _firstName = prefs.getString('firstName') ?? 'Usuario';
+      _username = prefs.getString('username') ?? '';
+      _email = prefs.getString('email') ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,34 +46,35 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // 1. Header (Back y Settings)
             _buildHeader(context),
             const SizedBox(height: 30),
 
-            // 2. Info de Usuario
             _buildUserInfo(context),
             const SizedBox(height: 25),
 
-            // 3. Stats y Botones de acción
             _buildStatsAndActions(context),
             const SizedBox(height: 30),
 
-            // 4. Tarjetas de Resumen
             _buildSummarySection(context),
             const SizedBox(height: 35),
 
-            // 5. Lista de Menú
             _buildMenuSection(context),
 
             const SizedBox(height: 30),
 
-            // 6. Botón Cerrar Sesión
+            // Botón Cerrar Sesión
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // Limpiar memoria al salir
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('firstName');
+                    await prefs.remove('username');
+                    
+                    if (!mounted) return;
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -74,7 +101,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 120), // Espacio extra para el scroll
+            const SizedBox(height: 120),
           ],
         ),
       ),
@@ -92,7 +119,7 @@ class ProfilePage extends StatelessWidget {
           color: isDark ? Colors.white : Colors.grey.shade800,
         ),
         Text(
-          'Profile',
+          'Perfil',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -130,16 +157,26 @@ class ProfilePage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 40,
-          backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=sandra'),
+        // Avatar Estilo Carita para el usuario también
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: const Color(0xFFC7B8F5).withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: const CaritaWidget(
+            size: 80,
+            color: Color(0xFFC7B8F5),
+            expressionType: 0,
+          ),
         ),
         const SizedBox(width: 15),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Sandra Glam',
+              _firstName, // DINÁMICO
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -147,7 +184,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             Text(
-              'Denmark, Copenhagen',
+              '@$_username', // DINÁMICO
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade500,
@@ -162,9 +199,9 @@ class ProfilePage extends StatelessWidget {
   Widget _buildStatsAndActions(BuildContext context) {
     return Row(
       children: [
-        _buildStat(context, 'Follow', '72'),
+        _buildStat(context, 'Citas', '12'),
         const SizedBox(width: 30),
-        _buildStat(context, 'Followers', '162'),
+        _buildStat(context, 'Puntos', '450'),
         const Spacer(),
         _buildActionButton(context, Icons.ios_share),
         const SizedBox(width: 10),
@@ -222,15 +259,6 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: SummaryCard(
-            title: 'Cortes Totales',
-            value: '12',
-            unit: 'estilos',
-            color: isDark ? const Color(0xFF01579B) : const Color(0xFFB3E5FC),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SummaryCard(
             title: 'Puntos Club',
             value: '450',
             unit: 'pts',
@@ -255,19 +283,9 @@ class ProfilePage extends StatelessWidget {
           subtitle: 'Tus expertos preferidos',
         ),
         ProfileMenuItem(
-          icon: Icons.credit_card,
-          title: 'Métodos de Pago',
-          subtitle: 'Gestionar tus tarjetas',
-        ),
-        ProfileMenuItem(
           icon: Icons.notifications_none,
           title: 'Notificaciones',
           subtitle: 'Citas y promociones',
-        ),
-        ProfileMenuItem(
-          icon: Icons.help_outline,
-          title: 'Soporte y Ayuda',
-          subtitle: '¿Necesitas algo?',
         ),
       ],
     );

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/src/pages/register_page.dart';
 import 'package:elegant_cut_mobile/src/pages/index_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
 import '../widgets/carita_widget.dart';
+import '../widgets/custom_toast.dart';
 import 'dart:io';
 
 class LoginPage extends StatefulWidget {
@@ -21,33 +23,40 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
 
   void _handleLogin() async {
-    final username = _usernameController.text.trim();
+    final usernameInput = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor completa todos los campos'),
-          backgroundColor: Colors.redAccent,
-        ),
+    if (usernameInput.isEmpty || password.isEmpty) {
+      CustomToast.show(
+        context,
+        'Por favor completa todos los campos',
+        ToastType.error,
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final result = await _authService.login(username, password);
+    final result = await _authService.login(usernameInput, password);
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (result['success']) {
+      // GUARDAR DATOS DEL USUARIO REAL
+      final prefs = await SharedPreferences.getInstance();
+      final userData = result['user'];
+      
+      // Guardamos el nombre real y el username
+      await prefs.setString('firstName', userData['prim_nombre'] ?? 'Usuario');
+      await prefs.setString('username', userData['username'] ?? '');
+      await prefs.setString('email', userData['email'] ?? '');
+
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.green,
-        ),
+      CustomToast.show(
+        context,
+        result['message'],
+        ToastType.success,
       );
       Navigator.pushReplacement(
         context,
@@ -55,11 +64,10 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.redAccent,
-        ),
+      CustomToast.show(
+        context,
+        result['message'],
+        ToastType.error,
       );
     }
   }

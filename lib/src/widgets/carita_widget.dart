@@ -23,37 +23,43 @@ class CaritaWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 15,
-              spreadRadius: 2,
-            )
+    final Widget carita = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 15,
+            spreadRadius: 2,
+          )
+        ],
+        gradient: RadialGradient(
+          colors: [
+            color.withOpacity(0.8),
+            color,
           ],
-          gradient: RadialGradient(
-            colors: [
-              color.withOpacity(0.8),
-              color,
-            ],
-            center: const Alignment(-0.3, -0.3),
-          ),
-        ),
-        child: CustomPaint(
-          painter: FacePainter(expressionType: expressionType),
+          center: const Alignment(-0.3, -0.3),
         ),
       ),
+      child: CustomPaint(
+        painter: FacePainter(expressionType: expressionType),
+      ),
     );
+
+    if (top != null || left != null || right != null || bottom != null) {
+      return Positioned(
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom,
+        child: carita,
+      );
+    }
+
+    return carita;
   }
 }
 
@@ -140,7 +146,19 @@ class FacePainter extends CustomPainter {
           ..quadraticBezierTo(size.width * 0.5, size.height * 0.7, size.width * 0.6, size.height * 0.65);
         canvas.drawPath(smallSmile, paint);
         break;
+      
+      case 5: // Sad
+        // Eyes
+        canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.4), size.width * 0.05, eyePaint);
+        canvas.drawCircle(Offset(size.width * 0.65, size.height * 0.4), size.width * 0.05, eyePaint);
+        // Frown
+        final frownPath = Path()
+          ..moveTo(size.width * 0.3, size.height * 0.75)
+          ..quadraticBezierTo(size.width * 0.5, size.height * 0.6, size.width * 0.7, size.height * 0.75);
+        canvas.drawPath(frownPath, paint);
+        break;
     }
+
     
     // Optional: Add a little "hair" or "antenna" like in the image
     final hairPath = Path()
