@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/main.dart';
 import 'package:elegant_cut_mobile/src/pages/login_page.dart';
 import 'package:elegant_cut_mobile/src/widgets/settings_tile.dart';
@@ -14,6 +15,12 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = true;
   bool _promotionsEnabled = false;
 
+  Future<void> _toggleTheme(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDark);
+    themeNotifier.value = isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -28,14 +35,14 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icon(Icons.arrow_back_ios_new, color: isDark ? Colors.white : Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Hero(
+        title: Hero(
           tag: 'settings_title',
           child: Material(
             color: Colors.transparent,
             child: Text(
               'Configuración',
               style: TextStyle(
-                color: Colors.black, 
+                color: isDark ? Colors.white : Colors.black, 
                 fontWeight: FontWeight.bold, 
                 fontSize: 20
               ),
@@ -79,22 +86,25 @@ class _SettingsPageState extends State<SettingsPage> {
             
             // Sección: Apariencia
             _buildSectionHeader('APARIENCIA'),
-            SwitchListTile(
-              secondary: _buildIconContainer(Icons.dark_mode_outlined, Colors.indigo),
-              title: Text(
-                'Modo Oscuro', 
-                style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black)
-              ),
-              subtitle: Text(
-                'Cambiar el tema de la aplicación',
-                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)
-              ),
-              value: themeNotifier.value == ThemeMode.dark,
-              activeColor: const Color(0xFFD48B41),
-              onChanged: (val) {
-                setState(() {
-                  themeNotifier.value = val ? ThemeMode.dark : ThemeMode.light;
-                });
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: themeNotifier,
+              builder: (context, mode, _) {
+                return SwitchListTile(
+                  secondary: _buildIconContainer(Icons.dark_mode_outlined, Colors.indigo),
+                  title: Text(
+                    'Modo Oscuro', 
+                    style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black)
+                  ),
+                  subtitle: Text(
+                    'Cambiar el tema de la aplicación',
+                    style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)
+                  ),
+                  value: mode == ThemeMode.dark,
+                  activeColor: const Color(0xFFD48B41),
+                  onChanged: (val) {
+                    _toggleTheme(val);
+                  },
+                );
               },
             ),
             

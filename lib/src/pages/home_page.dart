@@ -1,297 +1,170 @@
 import 'package:flutter/material.dart';
-import 'package:elegant_cut_mobile/src/widgets/barber_avatar_card.dart';
-import 'package:elegant_cut_mobile/src/widgets/service_card.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/carita_widget.dart';
+import '../widgets/animated_logo_text.dart';
+import 'barber_detail_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _firstName = 'Usuario';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _firstName = prefs.getString('firstName') ?? 'Usuario';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      color: theme.scaffoldBackgroundColor,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildHeader(context),
-            const SizedBox(height: 25),
-            _buildPromoCard(),
-            const SizedBox(height: 25),
-            _buildCalendar(context),
-            const SizedBox(height: 25),
-            _buildPlanSection(context),
-            const SizedBox(height: 25),
-            _buildBarbersSection(context),
-            const SizedBox(height: 25),
-            _buildServicesSection(context),
-            const SizedBox(height: 25),
-            _buildGallerySection(context),
-            const SizedBox(height: 120), // Espacio extra para el scroll
-          ],
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FB),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildHeader(context, isDark),
+              const SizedBox(height: 35),
+              
+              Text(
+                '¿Qué quieres hacer hoy?',
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              _buildQuickActionsGrid(isDark),
+              
+              const SizedBox(height: 40),
+              
+              _buildExpertSection(context, isDark),
+              
+              const SizedBox(height: 40),
+              
+              _buildNextAppointment(isDark),
+              
+              const SizedBox(height: 120),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildHeader(BuildContext context, bool isDark) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const CircleAvatar(
-          radius: 25,
-          backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=sandra'),
-        ),
-        const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hello, Sandra',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.grey.shade800,
+              'Hola, $_firstName', // DINÁMICO
+              style: GoogleFonts.outfit(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
               ),
             ),
-            Text(
-              'Today 25 Nov.',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-            ),
+            const SizedBox(height: 5),
+            AnimatedLogoText(isDark: isDark),
           ],
+
         ),
-        const Spacer(),
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isDark ? Colors.grey.shade900 : Colors.white,
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 2,
+            border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
+          ),
+          child: Stack(
+            children: [
+              Icon(Icons.notifications_none_rounded, color: isDark ? Colors.white : Colors.black87),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF6B6B),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
             ],
           ),
-          child: Icon(Icons.search, color: isDark ? Colors.white : Colors.black87),
         ),
       ],
     );
   }
 
-  Widget _buildPromoCard() {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        color: const Color(0xFFC7B8F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(25.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Daily\nchallenge',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Do your plan before 09:00 AM',
-                  style: TextStyle(
-                    color: Colors.black.withOpacity(0.7),
-                    fontSize: 13,
-                  ),
-                ),
-                const Spacer(),
-                _buildAvatarStack(),
-              ],
-            ),
-          ),
-          Positioned(
-            right: -10,
-            top: 20,
-            child: Icon(
-              Icons.blur_on,
-              size: 150,
-              color: Colors.black.withOpacity(0.1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatarStack() {
-    return Row(
-      children: [
-        for (int i = 0; i < 3; i++)
-          Align(
-            widthFactor: 0.7,
-            child: CircleAvatar(
-              radius: 15,
-              backgroundColor: Colors.white,
-              child: CircleAvatar(
-                radius: 13,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=$i'),
-              ),
-            ),
-          ),
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-          ),
-          child: const Center(
-            child: Text(
-              '+4',
-              style: TextStyle(color: Colors.white, fontSize: 10),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCalendar(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const numbers = ['22', '23', '24', '25', '26', '27', '28'];
-
-    return SizedBox(
-      height: 90,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: days.length,
-        itemBuilder: (context, index) {
-          bool isSelected = index == 3; // Miércoles 25
-          return Container(
-            width: 60,
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: isSelected 
-                  ? (isDark ? const Color(0xFFD48B41) : const Color(0xFF1C1C1E)) 
-                  : (isDark ? Colors.grey.shade900 : Colors.white),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                if (!isSelected)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  days[index],
-                  style: TextStyle(
-                    color: isSelected ? Colors.white70 : Colors.grey.shade500,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  numbers[index],
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : (isDark ? Colors.white : Colors.black),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (isSelected)
-                  Container(
-                    margin: const EdgeInsets.only(top: 5),
-                    width: 4,
-                    height: 4,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildPlanSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildQuickActionsGrid(bool isDark) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Your plan',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-        ),
-        const SizedBox(height: 15),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _buildPlanCard(
-                title: 'Corte &\nBarba',
-                subtitle: '25 Nov.\n14:00-15:00\nSilla 1',
-                tag: 'Premium',
-                color: const Color(0xFFFFB74D),
-                height: 250,
-              ),
+            _buildActionCard(
+              'Agendar Cita',
+              'Reserva tu turno ahora',
+              Icons.calendar_today_rounded,
+              const Color(0xFFE8F1FF),
+              const Color(0xFF4A90E2),
+              isDark,
             ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                children: [
-                  _buildPlanCard(
-                    title: 'Masaje',
-                    subtitle: '28 Nov.\n18:00-19:30',
-                    tag: 'Light',
-                    color: const Color(0xFFBAE5F4),
-                    height: 140,
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    height: 95,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9A8D4),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildSocialIcon(Icons.camera_alt_outlined),
-                        _buildSocialIcon(Icons.play_circle_outline),
-                        _buildSocialIcon(Icons.message_outlined),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(width: 20),
+            _buildActionCard(
+              'Tienda',
+              'Productos premium',
+              Icons.shopping_bag_outlined,
+              const Color(0xFFE8FFEF),
+              const Color(0xFF50C878),
+              isDark,
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            _buildActionCard(
+              'Cortes',
+              'Mira las tendencias',
+              Icons.content_cut_rounded,
+              const Color(0xFFFFF8E1),
+              const Color(0xFFF5A623),
+              isDark,
+            ),
+            const SizedBox(width: 20),
+            _buildActionCard(
+              'Ubicación',
+              '¿Cómo llegar?',
+              Icons.location_on_outlined,
+              const Color(0xFFFFE8E8),
+              const Color(0xFFFF6B6B),
+              isDark,
             ),
           ],
         ),
@@ -299,81 +172,47 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPlanCard({
-    required String title,
-    required String subtitle,
-    required String tag,
-    required Color color,
-    required double height,
-  }) {
-    return Container(
-      height: height,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              tag,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Text(
+  Widget _buildActionCard(String title, String desc, IconData icon, Color bgColor, Color iconColor, bool isDark) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : bgColor,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: isDark ? Colors.white : iconColor, size: 28),
+            const SizedBox(height: 15),
+            Text(
               title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 18,
+              style: GoogleFonts.outfit(
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                height: 1.1,
-                color: Colors.black,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            subtitle,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.black.withOpacity(0.6),
+            const SizedBox(height: 5),
+            Text(
+              desc,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: isDark ? Colors.grey.shade500 : Colors.black54,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSocialIcon(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.4),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: Colors.white, size: 20),
-    );
-  }
-
-  Widget _buildBarbersSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barbers = [
-      {'name': 'Marcus', 'rating': '4.9', 'img': 'https://i.pravatar.cc/150?u=1'},
-      {'name': 'Alex', 'rating': '4.8', 'img': 'https://i.pravatar.cc/150?u=2'},
-      {'name': 'Julian', 'rating': '4.7', 'img': 'https://i.pravatar.cc/150?u=3'},
-      {'name': 'Daniel', 'rating': '4.9', 'img': 'https://i.pravatar.cc/150?u=4'},
+  Widget _buildExpertSection(BuildContext context, bool isDark) {
+    final experts = [
+      {'name': 'Marcus', 'color': const Color(0xFF98E68E), 'expression': 0},
+      {'name': 'Alex', 'color': const Color(0xFFFFB2D1), 'expression': 1},
+      {'name': 'Julian', 'color': const Color(0xFF88C9F9), 'expression': 3},
+      {'name': 'Daniel', 'color': const Color(0xFFFFD56B), 'expression': 2},
     ];
 
     return Column(
@@ -381,150 +220,136 @@ class HomePage extends StatelessWidget {
       children: [
         Text(
           'Nuestros Expertos',
-          style: TextStyle(
-            fontSize: 22,
+          style: GoogleFonts.outfit(
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
-        const SizedBox(height: 15),
-        SizedBox(
-          height: 140,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: barbers.length,
-            itemBuilder: (context, index) {
-              return BarberAvatarCard(barber: barbers[index]);
-            },
+        const SizedBox(height: 20),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 65,
+                      height: 65,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.add, color: isDark ? Colors.white : Colors.black54),
+                    ),
+                    const SizedBox(height: 10),
+                    Text('Favorito', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+              ),
+              ...experts.map((exp) => Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BarberDetailPage(
+                          barber: {
+                            'name': exp['name'] as String,
+                            'color': exp['color'],
+                            'expression': exp['expression'],
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 65,
+                        height: 65,
+                        child: Hero(
+                          tag: 'barber_hero_${exp['name']}',
+                          child: CaritaWidget(
+                            size: 65,
+                            color: exp['color'] as Color,
+                            expressionType: exp['expression'] as int,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(exp['name'] as String, style: GoogleFonts.outfit(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
+                    ],
+                  ),
+                ),
+              )),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildServicesSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final services = [
-      {
-        'name': 'Corte Clásico',
-        'price': r'$25',
-        'icon': Icons.content_cut,
-        'color': isDark ? const Color(0xFF1A237E) : const Color(0xFFE3F2FD),
-      },
-      {
-        'name': 'Barba Real',
-        'price': r'$15',
-        'icon': Icons.face,
-        'color': isDark ? const Color(0xFF1B5E20) : const Color(0xFFF1F8E9),
-      },
-      {
-        'name': 'Combo VIP',
-        'price': r'$45',
-        'icon': Icons.auto_awesome,
-        'color': isDark ? const Color(0xFFE65100) : const Color(0xFFFFF3E0),
-      },
-      {
-        'name': 'Tratamiento',
-        'price': r'$20',
-        'icon': Icons.spa,
-        'color': isDark ? const Color(0xFF4A148C) : const Color(0xFFF3E5F5),
-      },
-    ];
-
+  Widget _buildNextAppointment(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Servicios Populares',
-          style: TextStyle(
-            fontSize: 22,
+          'Tu próxima cita',
+          style: GoogleFonts.outfit(
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
-        const SizedBox(height: 15),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 15,
-            mainAxisSpacing: 15,
-            childAspectRatio: 1.4,
-          ),
-          itemCount: services.length,
-          itemBuilder: (context, index) {
-            final s = services[index];
-            return ServiceCard(
-              name: s['name'] as String,
-              price: s['price'] as String,
-              icon: s['icon'] as IconData,
-              color: s['color'] as Color,
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGallerySection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Galería de Estilos',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-            ),
-            Text(
-              'Ver todo',
-              style: TextStyle(
-                color: isDark ? const Color(0xFFD48B41) : Colors.blue.shade700,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 20),
         Container(
-          height: 200,
-          width: double.infinity,
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            image: const DecorationImage(
-              image: NetworkImage(
-                'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1000',
-              ),
-              fit: BoxFit.cover,
-            ),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade100),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+            ],
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD48B41).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.access_time_rounded, color: Color(0xFFD48B41)),
               ),
-            ),
-            padding: const EdgeInsets.all(20),
-            alignment: Alignment.bottomLeft,
-            child: const Text(
-              'Tendencias 2024',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Corte & Barba Premium',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    Text(
+                      'Mañana, 14:00 PM con Marcus',
+                      style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+            ],
           ),
         ),
       ],

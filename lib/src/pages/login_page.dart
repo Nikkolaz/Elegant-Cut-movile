@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/src/pages/register_page.dart';
 import 'package:elegant_cut_mobile/src/pages/index_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,10 +22,10 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
 
   void _handleLogin() async {
-    final username = _usernameController.text.trim();
+    final usernameInput = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
+    if (usernameInput.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Por favor completa todos los campos'),
@@ -36,12 +37,21 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
 
-    final result = await _authService.login(username, password);
+    final result = await _authService.login(usernameInput, password);
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (result['success']) {
+      // GUARDAR DATOS DEL USUARIO REAL
+      final prefs = await SharedPreferences.getInstance();
+      final userData = result['user'];
+      
+      // Guardamos el nombre real y el username
+      await prefs.setString('firstName', userData['prim_nombre'] ?? 'Usuario');
+      await prefs.setString('username', userData['username'] ?? '');
+      await prefs.setString('email', userData['email'] ?? '');
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
