@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:elegant_cut_mobile/src/widgets/service_card.dart';
 
 class BarberDetailPage extends StatelessWidget {
   final Map<String, String> barber;
@@ -15,7 +16,7 @@ class BarberDetailPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // 1. Imagen de fondo principal (estática)
+          // 1. Imagen de fondo
           Positioned(
             top: 0,
             left: 0,
@@ -48,7 +49,7 @@ class BarberDetailPage extends StatelessWidget {
             ),
           ),
 
-          // 2. Información fija sobre la imagen
+          // 2. Información fija
           Positioned(
             top: size.height * 0.45,
             left: 25,
@@ -78,7 +79,7 @@ class BarberDetailPage extends StatelessWidget {
             ),
           ),
 
-          // 3. Draggable Scrollable Sheet (El panel interactivo)
+          // 3. Panel interactivo
           DraggableScrollableSheet(
             initialChildSize: 0.42,
             minChildSize: 0.4,
@@ -101,7 +102,6 @@ class BarberDetailPage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Handle Bar tipo iPhone
                     const SizedBox(height: 12),
                     Container(
                       width: 40,
@@ -112,8 +112,6 @@ class BarberDetailPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
-                    // Contenido Scrolleable
                     Expanded(
                       child: ListView(
                         controller: scrollController,
@@ -131,7 +129,7 @@ class BarberDetailPage extends StatelessWidget {
                           Text(
                             '${barber['name']} es un experto con más de 8 años en el arte de la barbería. '
                             'Especializado en técnicas modernas de degradado, corte clásico y diseño de barba '
-                            'con navaja. Su enfoque se basa en la precisión y el estilo personalizado para cada cliente.',
+                            'con navaja.',
                             style: TextStyle(
                               fontSize: 16,
                               color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
@@ -148,9 +146,30 @@ class BarberDetailPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 15),
-                          _buildServiceItem(context, 'Corte de Cabello', '45 min', r'$25'),
-                          _buildServiceItem(context, 'Perfilado de Barba', '30 min', r'$15'),
-                          _buildServiceItem(context, 'Tratamiento Capilar', '20 min', r'$20'),
+                          const ServiceCard(
+                            name: 'Corte de Cabello',
+                            price: r'$25',
+                            duration: '45 min',
+                            icon: Icons.content_cut,
+                            color: Colors.transparent,
+                            isListMode: true,
+                          ),
+                          const ServiceCard(
+                            name: 'Perfilado de Barba',
+                            price: r'$15',
+                            duration: '30 min',
+                            icon: Icons.face,
+                            color: Colors.transparent,
+                            isListMode: true,
+                          ),
+                          const ServiceCard(
+                            name: 'Tratamiento Capilar',
+                            price: r'$20',
+                            duration: '20 min',
+                            icon: Icons.spa,
+                            color: Colors.transparent,
+                            isListMode: true,
+                          ),
                           const SizedBox(height: 100),
                         ],
                       ),
@@ -200,7 +219,7 @@ class BarberDetailPage extends StatelessWidget {
             ),
           ),
 
-          // 5. Botones Superiores (Atrás y Compartir)
+          // 5. Botones Superiores
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -220,46 +239,6 @@ class BarberDetailPage extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServiceItem(BuildContext context, String name, String duration, String price) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade100),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name, 
-                style: TextStyle(
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 16,
-                  color: isDark ? Colors.white : Colors.black,
-                )
-              ),
-              Text(duration, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-            ],
-          ),
-          Text(
-            price, 
-            style: const TextStyle(
-              fontWeight: FontWeight.bold, 
-              fontSize: 16, 
-              color: Color(0xFFD48B41)
-            )
           ),
         ],
       ),
