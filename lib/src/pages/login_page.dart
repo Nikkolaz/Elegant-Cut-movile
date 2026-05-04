@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:elegant_cut_mobile/src/pages/register_page.dart';
 import 'package:elegant_cut_mobile/src/pages/index_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
+import '../widgets/carita_widget.dart';
 import 'dart:io';
 
 class LoginPage extends StatefulWidget {
@@ -80,27 +82,28 @@ class _LoginPageState extends State<LoginPage> {
             height: size.height * 0.65,
             child: RepaintBoundary(
               child: Container(
-                color: const Color(0xFFF0F4F8),
+                color: Color(0xFFF0F4F8),
                 child: Column(
                   children: [
                     const SizedBox(height: 60),
-                    const Text(
+                    Text(
                       'Elegant Cut',
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
+                      style: GoogleFonts.outfit(
+                        fontSize: 42,
+                        fontWeight: FontWeight.w800,
                         color: Colors.black,
-                        letterSpacing: -1,
+                        letterSpacing: -1.5,
                       ),
                     ),
                     Expanded(
                       child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          _buildBubble(top: 20, left: 20, size: 100, color: const Color(0xFFC7B8F5)),
-                          _buildBubble(top: 80, right: 30, size: 140, color: const Color(0xFFF9A8D4)),
-                          _buildBubble(bottom: 40, left: 50, size: 120, color: const Color(0xFFBAE5F4)),
-                          _buildBubble(top: 150, left: -20, size: 160, color: const Color(0xFFD48B41).withOpacity(0.6)),
-                          _buildBubble(bottom: 100, right: -30, size: 130, color: const Color(0xFFFFB74D).withOpacity(0.5)),
+                          CaritaWidget(top: 20, left: 30, size: 100, color: Color(0xFF98E68E), expressionType: 0), // Green Happy
+                          CaritaWidget(top: 80, right: 40, size: 130, color: Color(0xFFFFB2D1), expressionType: 1), // Pink Wink
+                          CaritaWidget(bottom: 60, left: 40, size: 120, color: Color(0xFF88C9F9), expressionType: 3), // Blue Cool
+                          CaritaWidget(top: 180, left: -20, size: 90, color: Color(0xFFFFD56B), expressionType: 2), // Yellow Surprised
+                          CaritaWidget(bottom: 20, right: 20, size: 80, color: Color(0xFFC7B8F5), expressionType: 4), // Purple Sleepy
                         ],
                       ),
                     ),
@@ -119,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF121212) : Colors.white,
+                  color: isDark ? Color(0xFF121212) : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(40),
                     topRight: Radius.circular(40),
@@ -150,8 +153,9 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 30),
                       Text(
                         'Inicia sesión para comenzar',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.outfit(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                         ),
                       ),
@@ -178,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                           Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Text('o usa tu cuenta', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                            child: Text('o usa tu cuenta', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 13)),
                           ),
                           Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
                         ],
@@ -216,7 +220,14 @@ class _LoginPageState extends State<LoginPage> {
                                 width: 20, 
                                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                               )
-                            : const Text('INGRESAR', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                            : Text(
+                                'INGRESAR', 
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.bold, 
+                                  letterSpacing: 1.2,
+                                  fontSize: 16,
+                                )
+                              ),
                         ),
                       ),
 
@@ -231,11 +242,11 @@ class _LoginPageState extends State<LoginPage> {
                         child: RichText(
                           text: TextSpan(
                             text: '¿No tienes cuenta? ',
-                            style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey),
-                            children: const [
+                            style: GoogleFonts.outfit(color: isDark ? Colors.grey.shade400 : Colors.grey, fontSize: 15),
+                            children: [
                               TextSpan(
                                 text: 'Regístrate',
-                                style: TextStyle(color: Color(0xFFD48B41), fontWeight: FontWeight.bold),
+                                style: GoogleFonts.outfit(color: const Color(0xFFD48B41), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -280,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(width: 10),
               Text(
                 label,
-                style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
+                style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ],
           ),
@@ -303,10 +314,10 @@ class _LoginPageState extends State<LoginPage> {
       child: TextField(
         controller: controller,
         obscureText: obscure,
-        style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
+        style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black, fontSize: 16),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.grey),
+          hintStyle: GoogleFonts.outfit(color: Colors.grey, fontSize: 15),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
         ),

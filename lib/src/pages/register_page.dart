@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
+import '../widgets/carita_widget.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -96,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
             height: size.height * 0.45,
             child: RepaintBoundary(
               child: Container(
-                color: const Color(0xFFF0F4F8),
+                color: Color(0xFFF0F4F8),
                 child: Column(
                   children: [
                     const SizedBox(height: 50),
@@ -106,23 +108,25 @@ class _RegisterPageState extends State<RegisterPage> {
                           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
                           onPressed: () => Navigator.pop(context),
                         ),
-                        const Text(
+                        Text(
                           'Crear Cuenta',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.outfit(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
                             color: Colors.black,
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ],
                     ),
                     Expanded(
                       child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          _buildBubble(top: 10, right: 40, size: 80, color: const Color(0xFFC7B8F5)),
-                          _buildBubble(top: 40, left: 30, size: 100, color: const Color(0xFFF9A8D4)),
-                          _buildBubble(bottom: 20, right: 20, size: 110, color: const Color(0xFFBAE5F4)),
-                          _buildBubble(top: 80, left: 120, size: 90, color: const Color(0xFFD48B41).withOpacity(0.4)),
+                          CaritaWidget(top: 10, right: 40, size: 90, color: Color(0xFF98E68E), expressionType: 0), // Green Happy
+                          CaritaWidget(top: 40, left: 30, size: 100, color: Color(0xFFFFB2D1), expressionType: 1), // Pink Wink
+                          CaritaWidget(bottom: 20, right: 20, size: 110, color: Color(0xFF88C9F9), expressionType: 3), // Blue Cool
+                          CaritaWidget(top: 80, left: 120, size: 95, color: Color(0xFFFFD56B), expressionType: 2), // Yellow Surprised
                         ],
                       ),
                     ),
@@ -141,7 +145,7 @@ class _RegisterPageState extends State<RegisterPage> {
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF121212) : Colors.white,
+                  color: isDark ? Color(0xFF121212) : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(40),
                     topRight: Radius.circular(40),
@@ -172,8 +176,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 30),
                       Text(
                         'Únete a la experiencia Elegant Cut',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.outfit(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                         ),
                       ),
@@ -200,7 +205,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Text('o crea tu cuenta', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                            child: Text('o crea tu cuenta', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 13)),
                           ),
                           Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
                         ],
@@ -299,7 +304,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 width: 20, 
                                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                               )
-                            : const Text('CREAR CUENTA', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                            : Text(
+                                'CREAR CUENTA', 
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.bold, 
+                                  letterSpacing: 1.2,
+                                  fontSize: 16,
+                                )
+                              ),
                         ),
                       ),
                       
@@ -309,11 +321,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: RichText(
                           text: TextSpan(
                             text: '¿Ya tienes cuenta? ',
-                            style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey),
-                            children: const [
+                            style: GoogleFonts.outfit(color: isDark ? Colors.grey.shade400 : Colors.grey, fontSize: 15),
+                            children: [
                               TextSpan(
                                 text: 'Inicia sesión',
-                                style: TextStyle(color: Color(0xFFD48B41), fontWeight: FontWeight.bold),
+                                style: GoogleFonts.outfit(color: const Color(0xFFD48B41), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -348,11 +360,11 @@ class _RegisterPageState extends State<RegisterPage> {
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
-        style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
+        style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black, fontSize: 16),
         decoration: InputDecoration(
           prefixIcon: icon != null ? Icon(icon, color: Colors.grey, size: 20) : null,
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+          hintStyle: GoogleFonts.outfit(color: Colors.grey, fontSize: 15),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
         ),
@@ -387,7 +399,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(width: 10),
               Text(
                 label,
-                style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
+                style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ],
           ),
