@@ -146,7 +146,19 @@ class FacePainter extends CustomPainter {
           ..quadraticBezierTo(size.width * 0.5, size.height * 0.7, size.width * 0.6, size.height * 0.65);
         canvas.drawPath(smallSmile, paint);
         break;
+      
+      case 5: // Sad
+        // Eyes
+        canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.4), size.width * 0.05, eyePaint);
+        canvas.drawCircle(Offset(size.width * 0.65, size.height * 0.4), size.width * 0.05, eyePaint);
+        // Frown
+        final frownPath = Path()
+          ..moveTo(size.width * 0.3, size.height * 0.75)
+          ..quadraticBezierTo(size.width * 0.5, size.height * 0.6, size.width * 0.7, size.height * 0.75);
+        canvas.drawPath(frownPath, paint);
+        break;
     }
+
     
     // Optional: Add a little "hair" or "antenna" like in the image
     final hairPath = Path()

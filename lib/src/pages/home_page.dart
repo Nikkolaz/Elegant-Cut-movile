@@ -93,32 +93,220 @@ class _HomePageState extends State<HomePage> {
           ],
 
         ),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
-          ),
-          child: Stack(
-            children: [
-              Icon(Icons.notifications_none_rounded, color: isDark ? Colors.white : Colors.black87),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF6B6B),
-                    shape: BoxShape.circle,
+        GestureDetector(
+          onTap: () => _showNotificationsModal(context, isDark),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
+            ),
+            child: Stack(
+              children: [
+                Icon(Icons.notifications_none_rounded, color: isDark ? Colors.white : Colors.black87),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF6B6B),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  void _showNotificationsModal(BuildContext context, bool isDark) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Notifications',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 600),
+      pageBuilder: (context, anim1, anim2) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  const SizedBox(height: 15),
+                  Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Notificaciones',
+                          style: GoogleFonts.outfit(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Limpiar',
+                            style: GoogleFonts.outfit(color: const Color(0xFFD48B41)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        _buildNotificationItem(
+                          'Recordatorio de cita',
+                          'Tu cita con Marcus es mañana a las 10:00 AM.',
+                          'Hace 2h',
+                          Icons.calendar_today_rounded,
+                          const Color(0xFF4A90E2),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Nueva promoción',
+                          '¡20% de descuento en todos los servicios de barba esta semana!',
+                          'Hace 5h',
+                          Icons.local_offer_outlined,
+                          const Color(0xFF50C878),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Puntos acumulados',
+                          '¡Has ganado 50 puntos por tu último corte! Sigue así.',
+                          'Ayer',
+                          Icons.stars_rounded,
+                          const Color(0xFFFFD56B),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Perfil actualizado',
+                          'Tu información de perfil ha sido actualizada correctamente.',
+                          'Hace 2 días',
+                          Icons.person_outline_rounded,
+                          Colors.grey,
+                          isDark,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: const Offset(0, 0),
+          ).animate(CurvedAnimation(
+            parent: anim1,
+            curve: Curves.fastOutSlowIn,
+          )),
+          child: child,
+        );
+      },
+    );
+  }
+
+  Widget _buildNotificationItem(
+    String title,
+    String desc,
+    String time,
+    IconData icon,
+    Color color,
+    bool isDark,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade100),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      time,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  desc,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

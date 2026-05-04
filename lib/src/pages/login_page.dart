@@ -5,6 +5,7 @@ import 'package:elegant_cut_mobile/src/pages/index_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
 import '../widgets/carita_widget.dart';
+import '../widgets/custom_toast.dart';
 import 'dart:io';
 
 class LoginPage extends StatefulWidget {
@@ -26,11 +27,10 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
 
     if (usernameInput.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor completa todos los campos'),
-          backgroundColor: Colors.redAccent,
-        ),
+      CustomToast.show(
+        context,
+        'Por favor completa todos los campos',
+        ToastType.error,
       );
       return;
     }
@@ -53,11 +53,10 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setString('email', userData['email'] ?? '');
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.green,
-        ),
+      CustomToast.show(
+        context,
+        result['message'],
+        ToastType.success,
       );
       Navigator.pushReplacement(
         context,
@@ -65,11 +64,10 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.redAccent,
-        ),
+      CustomToast.show(
+        context,
+        result['message'],
+        ToastType.error,
       );
     }
   }

@@ -11,6 +11,9 @@ class AnimatedLogoText extends StatefulWidget {
 }
 
 class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProviderStateMixin {
+  // Variable estática para persistir el estado durante la sesión de la app
+  static bool _hasPlayedLogoAnimation = false;
+  
   final String _fullText = 'Elegant Cut';
   
   String _currentText = '';
@@ -28,7 +31,7 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
     
     _morphController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000), // Más suave
+      duration: const Duration(milliseconds: 1000),
     );
 
     _tScale = Tween<double>(begin: 1.0, end: 0.0).animate(
@@ -45,15 +48,22 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
       CurvedAnimation(parent: _morphController, curve: const Interval(0.5, 1.0, curve: Curves.easeOut)),
     );
 
-    _startSequence();
+    // Lógica para que solo se ejecute una vez por sesión
+    if (_hasPlayedLogoAnimation) {
+      _currentText = _fullText;
+      _isMorphed = true;
+      _morphController.value = 1.0;
+    } else {
+      _startSequence();
+      _hasPlayedLogoAnimation = true;
+    }
   }
 
   void _startSequence() async {
     if (!mounted) return;
 
-    // Typewriter con ritmo suave y pausado
     for (int i = 0; i <= _fullText.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 140)); // Ritmo elegante
+      await Future.delayed(const Duration(milliseconds: 140));
       if (mounted) {
         setState(() {
           _currentText = _fullText.substring(0, i);
@@ -61,7 +71,6 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
       }
     }
 
-    // Espera para contemplar el nombre completo antes del "pop"
     await Future.delayed(const Duration(milliseconds: 800));
     if (mounted) {
       _morphController.forward();
@@ -84,10 +93,9 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
       fontSize: 32,
       fontWeight: FontWeight.bold,
       color: textColor,
-      letterSpacing: 0, // Quitamos el tracking negativo para evitar separación rara
+      letterSpacing: 0,
     );
 
-    // Dividimos el texto para asegurar que la 't' esté pegada
     final bool hasLastT = _currentText.length == _fullText.length;
     final String mainPart = hasLastT ? _currentText.substring(0, _currentText.length - 1) : _currentText;
 
@@ -101,7 +109,6 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
           Stack(
             alignment: Alignment.center,
             children: [
-              // La 't' original sin márgenes extra
               AnimatedBuilder(
                 animation: _morphController,
                 builder: (context, child) {
@@ -114,7 +121,6 @@ class _AnimatedLogoTextState extends State<AnimatedLogoText> with TickerProvider
                   );
                 },
               ),
-              // La carita con pop suave
               AnimatedBuilder(
                 animation: _morphController,
                 builder: (context, child) {
@@ -158,18 +164,12 @@ class _ProFacePainter extends CustomPainter {
 
     final w = size.width;
     final h = size.height;
-
-    // Ojo izquierdo
     canvas.drawCircle(Offset(w * 0.3, h * 0.45), 1.5, paint..style = PaintingStyle.fill);
-
-    // Guiño Apple Style
     paint.style = PaintingStyle.stroke;
     final winkPath = Path()
       ..moveTo(w * 0.6, h * 0.45)
       ..quadraticBezierTo(w * 0.7, h * 0.35, w * 0.8, h * 0.45);
     canvas.drawPath(winkPath, paint);
-
-    // Sonrisa perfecta
     final smilePath = Path()
       ..moveTo(w * 0.25, h * 0.75)
       ..quadraticBezierTo(w * 0.5, h * 0.95, w * 0.75, h * 0.75);

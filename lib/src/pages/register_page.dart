@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
 import '../widgets/carita_widget.dart';
+import '../widgets/custom_toast.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -34,11 +35,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || username.isEmpty || firstName.isEmpty || lastName1.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor completa los campos obligatorios (*)'),
-          backgroundColor: Colors.redAccent,
-        ),
+      CustomToast.show(
+        context,
+        'Por favor completa los campos obligatorios (*)',
+        ToastType.error,
       );
       return;
     }
@@ -61,22 +61,20 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (result['success']) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Cuenta creada con éxito!'),
-          backgroundColor: Colors.green,
-        ),
+      CustomToast.show(
+        context,
+        '¡Cuenta creada con éxito!',
+        ToastType.success,
       );
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) Navigator.pop(context);
       });
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.redAccent,
-        ),
+      CustomToast.show(
+        context,
+        result['message'],
+        ToastType.error,
       );
     }
   }
