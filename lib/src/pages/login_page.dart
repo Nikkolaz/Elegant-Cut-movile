@@ -16,16 +16,27 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
+  late final GoogleSignIn _googleSignIn;
+  bool _isHeavyContentVisible = false;
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: '859330875259-h0oa83sb0k5e46rg3bop16unfao1jch6.apps.googleusercontent.com',
-  );
+
+  @override
+  void initState() {
+    super.initState();
+    _googleSignIn = GoogleSignIn(
+      serverClientId: '859330875259-h0oa83sb0k5e46rg3bop16unfao1jch6.apps.googleusercontent.com',
+    );
+
+    // Retraso mínimo para asegurar que la transición de entrada sea fluida
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) setState(() => _isHeavyContentVisible = true);
+    });
+  }
 
   void _handleLogin() async {
     final usernameInput = _usernameController.text.trim();
@@ -177,13 +188,15 @@ class _LoginPageState extends State<LoginPage> {
                     Expanded(
                       child: Stack(
                         clipBehavior: Clip.none,
-                        children: [
-                          CaritaWidget(top: 20, left: 30, size: 100, color: Color(0xFF98E68E), expressionType: 0), // Green Happy
-                          CaritaWidget(top: 80, right: 40, size: 130, color: Color(0xFFFFB2D1), expressionType: 1), // Pink Wink
-                          CaritaWidget(bottom: 60, left: 40, size: 120, color: Color(0xFF88C9F9), expressionType: 3), // Blue Cool
-                          CaritaWidget(top: 180, left: -20, size: 90, color: Color(0xFFFFD56B), expressionType: 2), // Yellow Surprised
-                          CaritaWidget(bottom: 20, right: 20, size: 80, color: Color(0xFFC7B8F5), expressionType: 4), // Purple Sleepy
-                        ],
+                        children: _isHeavyContentVisible 
+                          ? [
+                              CaritaWidget(top: 20, left: 30, size: 100, color: const Color(0xFF98E68E), expressionType: 0), // Green Happy
+                              CaritaWidget(top: 80, right: 40, size: 130, color: const Color(0xFFFFB2D1), expressionType: 1), // Pink Wink
+                              CaritaWidget(bottom: 60, left: 40, size: 120, color: const Color(0xFF88C9F9), expressionType: 3), // Blue Cool
+                              CaritaWidget(top: 180, left: -20, size: 90, color: const Color(0xFFFFD56B), expressionType: 2), // Yellow Surprised
+                              CaritaWidget(bottom: 20, right: 20, size: 80, color: const Color(0xFFC7B8F5), expressionType: 4), // Purple Sleepy
+                            ]
+                          : [],
                       ),
                     ),
                     const SizedBox(height: 100),
@@ -304,120 +317,141 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
-          // 3. Draggable Scrollable Sheet
+                    // 3. Draggable Scrollable Sheet optimizado
           DraggableScrollableSheet(
             initialChildSize: 0.45,
             minChildSize: 0.45,
             maxChildSize: 0.95,
             builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: isDark ? Color(0xFF121212) : Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    )
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 40,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Text(
-                        'Inicia sesión para comenzar',
-                        style: GoogleFonts.outfit(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-
-                      _buildSocialButton(
-                        icon: Icons.g_mobiledata,
-                        label: 'Sign in with Google',
-                        color: Colors.white,
-                        textColor: Colors.black,
-                        borderColor: Colors.grey.shade300,
-                      ),
-
-
-                      const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Text('o usa tu cuenta', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 13)),
-                          ),
-                          Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-
-                      _buildTextField(
-                        controller: _usernameController,
-                        hint: 'Nombre de usuario',
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 15),
-                      _buildTextField(
-                        controller: _passwordController,
-                        hint: 'Contraseña',
-                        isDark: isDark,
-                        obscure: true,
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD48B41),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            elevation: 0,
-                          ),
-                          child: _isLoading 
-                            ? const SizedBox(
-                                height: 20, 
-                                width: 20, 
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                              )
-                            : Text(
-                                'INGRESAR', 
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold, 
-                                  letterSpacing: 1.2,
-                                  fontSize: 16,
-                                )
-                              ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
+              return RepaintBoundary(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF121212) : Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(40),
+                      topRight: Radius.circular(40),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      )
                     ],
+                  ),
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        Container(
+                          width: 40,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        
+                        // Entrada animada sutil para el contenido
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Transform.translate(
+                                offset: Offset(0, 20 * (1 - value)),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _isHeavyContentVisible 
+                            ? Column(
+                                children: [
+                                  Text(
+                                    'Inicia sesión para comenzar',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 30),
+            
+                                  _buildSocialButton(
+                                    icon: Icons.g_mobiledata,
+                                    label: 'Sign in with Google',
+                                    color: Colors.white,
+                                    textColor: Colors.black,
+                                    borderColor: Colors.grey.shade300,
+                                  ),
+            
+                                  const SizedBox(height: 30),
+                                  Row(
+                                    children: [
+                                      Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                                        child: Text('o usa tu cuenta', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 13)),
+                                      ),
+                                      Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 30),
+            
+                                  _buildTextField(
+                                    controller: _usernameController,
+                                    hint: 'Nombre de usuario',
+                                    isDark: isDark,
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _passwordController,
+                                    hint: 'Contraseña',
+                                    isDark: isDark,
+                                    obscure: true,
+                                  ),
+            
+                                  const SizedBox(height: 30),
+            
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 60,
+                                    child: ElevatedButton(
+                                      onPressed: _isLoading ? null : _handleLogin,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFD48B41),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                        elevation: 0,
+                                      ),
+                                      child: _isLoading 
+                                        ? const SizedBox(
+                                            height: 20, 
+                                            width: 20, 
+                                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                                          )
+                                        : Text(
+                                            'INGRESAR', 
+                                            style: GoogleFonts.outfit(
+                                              fontWeight: FontWeight.bold, 
+                                              letterSpacing: 1.2,
+                                              fontSize: 16,
+                                            )
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox(height: 300), // Placeholder mientras carga
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               );
