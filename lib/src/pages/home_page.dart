@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
+import 'book_appointment_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -322,6 +323,12 @@ class _HomePageState extends State<HomePage> {
               const Color(0xFFE8F1FF),
               const Color(0xFF4A90E2),
               isDark,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
+                );
+              },
             ),
             const SizedBox(width: 20),
             _buildActionCard(
@@ -360,16 +367,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildActionCard(String title, String desc, IconData icon, Color bgColor, Color iconColor, bool isDark) {
+  Widget _buildActionCard(String title, String desc, IconData icon, Color bgColor, Color iconColor, bool isDark, {VoidCallback? onTap}) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1C1C1E) : bgColor,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : bgColor,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, color: isDark ? Colors.white : iconColor, size: 28),
             const SizedBox(height: 15),
@@ -391,6 +400,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

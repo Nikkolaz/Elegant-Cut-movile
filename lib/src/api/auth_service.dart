@@ -93,4 +93,37 @@ class AuthService {
       };
     }
   }
+
+  /// Método para iniciar sesión con Google
+  Future<Map<String, dynamic>> loginWithGoogle(String idToken) async {
+    try {
+      final url = Uri.parse('$_baseUrl/auth/google');
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'token': idToken}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'token': data['token'] ?? '',
+          'user': data['user'],
+          'message': data['message'] ?? 'Login con Google exitoso'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Error con Google'
+        };
+      }
+    } catch (e) {
+      print('Error en Google Login: $e');
+      return {'success': false, 'message': 'Error de conexión con Google'};
+    }
+  }
 }

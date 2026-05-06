@@ -7,6 +7,8 @@ import '../api/auth_service.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/custom_toast.dart';
 import 'dart:io';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:math' as math;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,6 +23,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: '859330875259-h0oa83sb0k5e46rg3bop16unfao1jch6.apps.googleusercontent.com',
+  );
 
   void _handleLogin() async {
     final usernameInput = _usernameController.text.trim();
@@ -72,6 +77,72 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Función para el proceso de inicio de sesión con Google
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      setState(() => _isLoading = true);
+
+      // 1. Abrir el selector de cuentas de Google
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return; // El usuario canceló
+      }
+
+      // 2. Obtener el token de identidad
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken != null) {
+        // 3. Enviar el token a tu backend usando el servicio
+        final result = await _authService.loginWithGoogle(idToken);
+
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+
+        if (result['success']) {
+          // Guardar datos del usuario igual que el login normal
+          final prefs = await SharedPreferences.getInstance();
+          final userData = result['user'];
+
+          await prefs.setString(
+              'firstName', userData['prim_nombre'] ?? 'Usuario');
+          await prefs.setString('username', userData['username'] ?? '');
+          await prefs.setString('email', userData['email'] ?? '');
+
+          if (!mounted) return;
+          CustomToast.show(
+            context,
+            result['message'],
+            ToastType.success,
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const IndexPage()),
+          );
+        } else {
+          if (!mounted) return;
+          CustomToast.show(
+            context,
+            result['message'],
+            ToastType.error,
+          );
+        }
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      print('Error en Google Sign In: $error');
+      CustomToast.show(
+        context,
+        'Error al conectar con Google',
+        ToastType.error,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -93,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                 color: Color(0xFFF0F4F8),
                 child: Column(
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 100),
                     Text(
                       'Elegant Cut',
                       style: GoogleFonts.outfit(
@@ -122,7 +193,119 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // 2. Draggable Scrollable Sheet
+          // 2. Botón de Registro animado (Esquina superior derecha)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, right: 20.0),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: child,
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD48B41).withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Material(
+                      color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation, secondaryAnimation) => const RegisterPage(),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                const begin = Offset(1.0, 0.0);
+                                const end = Offset.zero;
+                                const curve = Curves.fastOutSlowIn;
+                                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              transitionDuration: const Duration(milliseconds: 400),
+                            ),
+                          );
+                        },
+                        splashColor: const Color(0xFFD48B41).withOpacity(0.1),
+                        highlightColor: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(
+                              color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Únete ahora',
+                                style: GoogleFonts.outfit(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD48B41),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  duration: const Duration(seconds: 3),
+                                  builder: (context, value, child) {
+                                    final offset = math.sin(value * 6 * math.pi) * 3.0; // 3 rebotes rápidos
+                                    return Transform.translate(
+                                      offset: Offset(offset, 0),
+                                      child: child,
+                                    );
+                                  },
+                                  child: const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 3. Draggable Scrollable Sheet
           DraggableScrollableSheet(
             initialChildSize: 0.45,
             minChildSize: 0.45,
@@ -176,13 +359,7 @@ class _LoginPageState extends State<LoginPage> {
                         textColor: Colors.black,
                         borderColor: Colors.grey.shade300,
                       ),
-                      const SizedBox(height: 15),
-                      _buildSocialButton(
-                        icon: Icons.apple,
-                        label: 'Sign in with Apple',
-                        color: Colors.black,
-                        textColor: Colors.white,
-                      ),
+
 
                       const SizedBox(height: 30),
                       Row(
@@ -240,33 +417,14 @@ class _LoginPageState extends State<LoginPage> {
                       ),
 
                       const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const RegisterPage()),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            text: '¿No tienes cuenta? ',
-                            style: GoogleFonts.outfit(color: isDark ? Colors.grey.shade400 : Colors.grey, fontSize: 15),
-                            children: [
-                              TextSpan(
-                                text: 'Regístrate',
-                                style: GoogleFonts.outfit(color: const Color(0xFFD48B41), fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
               );
             },
           ),
+
+
         ],
       ),
     );
@@ -290,7 +448,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: _isLoading ? null : _handleGoogleSignIn,
           borderRadius: BorderRadius.circular(15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

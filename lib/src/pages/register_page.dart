@@ -189,13 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         textColor: Colors.black,
                         borderColor: Colors.grey.shade300,
                       ),
-                      const SizedBox(height: 15),
-                      _buildSocialButton(
-                        icon: Icons.apple,
-                        label: 'Register with Apple',
-                        color: Colors.black,
-                        textColor: Colors.white,
-                      ),
+
 
                       const SizedBox(height: 30),
                       Row(
@@ -313,22 +307,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       
-                      const SizedBox(height: 30),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: RichText(
-                          text: TextSpan(
-                            text: '¿Ya tienes cuenta? ',
-                            style: GoogleFonts.outfit(color: isDark ? Colors.grey.shade400 : Colors.grey, fontSize: 15),
-                            children: [
-                              TextSpan(
-                                text: 'Inicia sesión',
-                                style: GoogleFonts.outfit(color: const Color(0xFFD48B41), fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 50),
                     ],
                   ),
