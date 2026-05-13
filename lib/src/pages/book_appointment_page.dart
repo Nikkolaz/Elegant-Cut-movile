@@ -360,7 +360,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            bottom: _selectedServices.isNotEmpty ? 40 : -100,
+            bottom: _selectedServices.isNotEmpty ? 50 : -120,
             left: 20,
             right: 20,
             child: _buildCartBar(),
