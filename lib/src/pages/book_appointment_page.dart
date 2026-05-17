@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/carita_widget.dart';
+import 'checkout_page.dart';
 
 class BookAppointmentPage extends StatefulWidget {
   const BookAppointmentPage({super.key});
@@ -412,7 +413,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              // Navegar al siguiente paso
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CheckoutPage(
+                    products: _selectedServices,
+                    total: total,
+                    isServiceBooking: true,
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD48B41),

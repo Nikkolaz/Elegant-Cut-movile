@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/carita_widget.dart';
+import 'checkout_page.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -129,22 +130,6 @@ class _ShopPageState extends State<ShopPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black12, width: 1),
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 18,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,7 +196,8 @@ class _ShopPageState extends State<ShopPage> {
                 child: SingleChildScrollView(
                   controller: scrollController,
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(top: 25, bottom: 120),
+                  // bottom: 220 = barra carrito (85) + nav bar (80) + margen extra (55)
+                  padding: const EdgeInsets.only(top: 25, bottom: 220),
                   child: Column(
                     children: [
                       // Categorías
@@ -254,10 +240,11 @@ class _ShopPageState extends State<ShopPage> {
           ),
 
           // --- 3. BARRA DE CARRITO ---
+          // Se posiciona 100px desde abajo: 80px de la BottomNavBar del IndexPage + 20px de margen visual
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            bottom: _selectedProducts.isNotEmpty ? 40 : -100,
+            bottom: _selectedProducts.isNotEmpty ? 100 : -200,
             left: 20,
             right: 20,
             child: _buildCartBar(),
@@ -463,7 +450,17 @@ class _ShopPageState extends State<ShopPage> {
             ],
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CheckoutPage(
+                    products: _selectedProducts,
+                    total: total,
+                  ),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD48B41),
               foregroundColor: Colors.white,

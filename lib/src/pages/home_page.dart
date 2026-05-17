@@ -5,6 +5,7 @@ import '../widgets/carita_widget.dart';
 import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
 import 'book_appointment_page.dart';
+import 'ubicacion_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +16,36 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _firstName = 'Usuario';
+  List<Map<String, dynamic>> _notifications = [
+    {
+      'title': 'Recordatorio de cita',
+      'desc': 'Tu cita con Marcus es mañana a las 10:00 AM.',
+      'time': 'Hace 2h',
+      'icon': Icons.calendar_today_rounded,
+      'color': const Color(0xFF4A90E2),
+    },
+    {
+      'title': 'Nueva promoción',
+      'desc': '¡20% de descuento en todos los servicios de barba esta semana!',
+      'time': 'Hace 5h',
+      'icon': Icons.local_offer_outlined,
+      'color': const Color(0xFF50C878),
+    },
+    {
+      'title': 'Puntos acumulados',
+      'desc': '¡Has ganado 50 puntos por tu último corte! Sigue así.',
+      'time': 'Ayer',
+      'icon': Icons.stars_rounded,
+      'color': const Color(0xFFFFD56B),
+    },
+    {
+      'title': 'Perfil actualizado',
+      'desc': 'Tu información de perfil ha sido actualizada correctamente.',
+      'time': 'Hace 2 días',
+      'icon': Icons.person_outline_rounded,
+      'color': Colors.grey,
+    },
+  ];
 
   @override
   void initState() {
@@ -106,18 +137,19 @@ class _HomePageState extends State<HomePage> {
             child: Stack(
               children: [
                 Icon(Icons.notifications_none_rounded, color: isDark ? Colors.white : Colors.black87),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFF6B6B),
-                      shape: BoxShape.circle,
+                if (_notifications.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF6B6B),
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -134,98 +166,96 @@ class _HomePageState extends State<HomePage> {
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 600),
       pageBuilder: (context, anim1, anim2) {
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                children: [
-                  const SizedBox(height: 15),
-                  Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.75,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 15),
+                      Container(
+                        width: 40,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Notificaciones',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                            if (_notifications.isNotEmpty)
+                              TextButton(
+                                onPressed: () {
+                                  setModalState(() {
+                                    _notifications.clear();
+                                  });
+                                  setState(() {});
+                                },
+                                child: Text(
+                                  'Limpiar',
+                                  style: GoogleFonts.outfit(color: const Color(0xFFD48B41)),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Expanded(
+                        child: _notifications.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No hay notificaciones',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 25),
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: _notifications.length,
+                                itemBuilder: (context, index) {
+                                  final notif = _notifications[index];
+                                  return _buildNotificationItem(
+                                    notif['title'],
+                                    notif['desc'],
+                                    notif['time'],
+                                    notif['icon'],
+                                    notif['color'],
+                                    isDark,
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
                   ),
-                  const SizedBox(height: 25),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Notificaciones',
-                          style: GoogleFonts.outfit(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Limpiar',
-                            style: GoogleFonts.outfit(color: const Color(0xFFD48B41)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        _buildNotificationItem(
-                          'Recordatorio de cita',
-                          'Tu cita con Marcus es mañana a las 10:00 AM.',
-                          'Hace 2h',
-                          Icons.calendar_today_rounded,
-                          const Color(0xFF4A90E2),
-                          isDark,
-                        ),
-                        _buildNotificationItem(
-                          'Nueva promoción',
-                          '¡20% de descuento en todos los servicios de barba esta semana!',
-                          'Hace 5h',
-                          Icons.local_offer_outlined,
-                          const Color(0xFF50C878),
-                          isDark,
-                        ),
-                        _buildNotificationItem(
-                          'Puntos acumulados',
-                          '¡Has ganado 50 puntos por tu último corte! Sigue así.',
-                          'Ayer',
-                          Icons.stars_rounded,
-                          const Color(0xFFFFD56B),
-                          isDark,
-                        ),
-                        _buildNotificationItem(
-                          'Perfil actualizado',
-                          'Tu información de perfil ha sido actualizada correctamente.',
-                          'Hace 2 días',
-                          Icons.person_outline_rounded,
-                          Colors.grey,
-                          isDark,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
       transitionBuilder: (context, anim1, anim2, child) {
@@ -360,6 +390,12 @@ class _HomePageState extends State<HomePage> {
               const Color(0xFFFFE8E8),
               const Color(0xFFFF6B6B),
               isDark,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UbicacionPage()),
+                );
+              },
             ),
           ],
         ),
