@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../api/booking_api_service.dart';
+import '../api/barber_api_service.dart';
+import '../widgets/custom_toast.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<Map<String, dynamic>> products;
@@ -67,36 +70,8 @@ class _CheckoutPageState extends State<CheckoutPage>
     '6:00 PM',
   ];
 
-  final List<Map<String, dynamic>> _barbers = [
-    {
-      'name': 'Carlos M.',
-      'specialty': 'Cortes Clásicos',
-      'rating': 4.9,
-      'color': const Color(0xFFFFD56B),
-      'emoji': '💈',
-    },
-    {
-      'name': 'Miguel A.',
-      'specialty': 'Degradados & Diseño',
-      'rating': 4.8,
-      'color': const Color(0xFF88C9F9),
-      'emoji': '✂️',
-    },
-    {
-      'name': 'Andrés R.',
-      'specialty': 'Barba & Facial',
-      'rating': 4.7,
-      'color': const Color(0xFF98E68E),
-      'emoji': '🧔',
-    },
-    {
-      'name': 'Sofia L.',
-      'specialty': 'Coloración & Damas',
-      'rating': 5.0,
-      'color': const Color(0xFFFFB2D1),
-      'emoji': '💇‍♀️',
-    },
-  ];
+  List<Map<String, dynamic>> _barbers = [];
+  bool _isLoadingBarbers = true;
 
   final List<String> _stepTitles = [
     'Tu Orden',
@@ -108,19 +83,9 @@ class _CheckoutPageState extends State<CheckoutPage>
   void initState() {
     super.initState();
     _cartItems = List<Map<String, dynamic>>.from(widget.products);
-
-    // Pre-select barber if coming from barber detail
-    if (widget.preSelectedBarberName != null) {
-      for (int i = 0; i < _barbers.length; i++) {
-        if ((_barbers[i]['name'] as String)
-            .toLowerCase()
-            .contains(widget.preSelectedBarberName!.toLowerCase().split(' ').first)) {
-          _selectedBarber = i;
-          break;
-        }
-      }
-    }
     _currentTotal = widget.total;
+
+    _loadBarbers();
 
     _stepAnimController = AnimationController(
       vsync: this,
@@ -172,19 +137,73 @@ class _CheckoutPageState extends State<CheckoutPage>
     _stepAnimController.forward();
   }
 
+  Future<void> _loadBarbers() async {
+    final barbers = await BarberApiService().getBarbers();
+    
+    // Assign colors and emojis based on index
+    final colorHex = [0xFF98E68E, 0xFFFFB2D1, 0xFF88C9F9, 0xFFFFD56B];
+    final emojis = ['💈', '✂️', '🧔', '💇‍♀️'];
+    
+    for (int i = 0; i < barbers.length; i++) {
+      barbers[i]['color'] = Color(colorHex[i % colorHex.length]);
+      barbers[i]['emoji'] = emojis[i % emojis.length];
+      barbers[i]['specialty'] = (barbers[i]['specialties'] as List?)?.join(', ') ?? 'Barbero';
+    }
+
+    if (mounted) {
+      setState(() {
+        _barbers = barbers;
+        _isLoadingBarbers = false;
+        
+        if (widget.preSelectedBarberName != null) {
+          for (int i = 0; i < _barbers.length; i++) {
+            if ((_barbers[i]['name'] as String)
+                .toLowerCase()
+                .contains(widget.preSelectedBarberName!.toLowerCase().split(' ').first)) {
+              _selectedBarber = i;
+              break;
+            }
+          }
+        }
+      });
+    }
+  }
+
   bool get _canProceedFromStep0 => _cartItems.isNotEmpty;
   bool get _canProceedFromStep1 =>
       _selectedTimeSlot >= 0 && _selectedBarber >= 0;
 
-  void _processBooking() {
+  Future<void> _processBooking() async {
     HapticFeedback.heavyImpact();
     setState(() => _isProcessing = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
+    if (widget.isServiceBooking) {
+      final success = await BookingApiService().createAppointment(
+        barberId: _barbers[_selectedBarber]['id'],
+        serviceIds: _cartItems.map((s) => s['id'] as int? ?? 1).toList(),
+        date: _selectedDate,
+        horaInicio: _selectedTimeSlot,
+        horaFin: _selectedTimeSlot + 1,
+        observaciones: _notesController.text,
+      );
+
+      if (!mounted) return;
+      setState(() => _isProcessing = false);
+
+      if (success) {
+        _showSuccessScreen();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al procesar la reserva, intenta de nuevo.'), backgroundColor: Colors.red),
+        );
+      }
+    } else {
+      // Simular compra de productos de tienda
+      await Future.delayed(const Duration(seconds: 2));
       if (!mounted) return;
       setState(() => _isProcessing = false);
       _showSuccessScreen();
-    });
+    }
   }
 
   // ══════════════════════════════════════════
@@ -986,7 +1005,12 @@ class _CheckoutPageState extends State<CheckoutPage>
           // ── Barber Selection ──
           _buildSectionTitle('Elige tu Barbero', isDark),
           const SizedBox(height: 15),
-          ...List.generate(_barbers.length, (index) {
+          if (_isLoadingBarbers)
+            const Center(child: CircularProgressIndicator(color: Color(0xFFD48B41)))
+          else if (_barbers.isEmpty)
+            Text('No hay barberos disponibles', style: GoogleFonts.outfit(color: Colors.grey))
+          else
+            ...List.generate(_barbers.length, (index) {
             final barber = _barbers[index];
             final isSelected = _selectedBarber == index;
 
@@ -1272,7 +1296,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                         child: _buildConfirmInfoTile(
                           icon: Icons.person_rounded,
                           label: 'Barbero',
-                          value: _selectedBarber >= 0
+                          value: _selectedBarber >= 0 && _selectedBarber < _barbers.length
                               ? _barbers[_selectedBarber]['name']
                               : '--',
                         ),

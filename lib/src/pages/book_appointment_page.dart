@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
+import '../api/services_api_service.dart';
+import '../api/barber_api_service.dart';
 import 'checkout_page.dart';
 
 class BookAppointmentPage extends StatefulWidget {
-  final String? preSelectedBarberName;
-
-  const BookAppointmentPage({super.key, this.preSelectedBarberName});
+  final Map<String, dynamic>? preselectedBarber;
+  const BookAppointmentPage({super.key, this.preselectedBarber});
 
   @override
   State<BookAppointmentPage> createState() => _BookAppointmentPageState();
@@ -47,103 +46,37 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     {'name': 'Damas', 'icon': Icons.face_3_rounded},
   ];
 
-  final List<Map<String, dynamic>> _allServices = [
-    {
-      'category': 1, // Cortes
-      'bgColor': const Color(0xFF2C2C2E),
-      'tagText': 'ESTILO PREMIUM',
-      'tagColor': const Color(0xFFD48B41),
-      'title': 'Corte Clásico y Perfilado',
-      'titleColor': Colors.white,
-      'iconData': Icons.content_cut_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.1),
-      'iconColor': const Color(0xFFD48B41),
-      'price': '\$35',
-    },
-    {
-      'category': 1, // Cortes
-      'bgColor': const Color(0xFF88C9F9),
-      'tagText': 'MODERNO',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Degradado Fade y diseño',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.cut_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$20',
-    },
-    {
-      'category': 2, // Barba
-      'bgColor': const Color(0xFFB4B0FE),
-      'tagText': 'MANTENIMIENTO',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Perfilado y toalla caliente',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.water_drop_outlined,
-      'iconBgColor': Colors.white.withOpacity(0.3),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$25',
-    },
-    {
-      'category': 3, // Facial
-      'bgColor': const Color(0xFFFFD56B),
-      'tagText': 'RELAJACIÓN TOTAL',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Limpieza facial profunda',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.face_retouching_natural_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$15',
-    },
-    {
-      'category': 4, // Damas
-      'bgColor': const Color(0xFF98E68E),
-      'tagText': 'CAMBIO DE LOOK',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Corte de puntas y secado',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.face_3_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$40',
-    },
-    {
-      'category': 4, // Damas
-      'bgColor': const Color(0xFFFFB2D1),
-      'tagText': 'COLORACIÓN',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Balayage e Iluminación',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.brush_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$85',
-    },
-    {
-      'category': 4, // Damas
-      'bgColor': const Color(0xFFB4B0FE),
-      'tagText': 'CUIDADO CAPILAR',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Tratamiento de Keratina',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.waves_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.3),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': '\$120',
-    },
-  ];
+  List<Map<String, dynamic>> _allServices = [];
+  int _barbersCount = 0;
+  bool _isLoading = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadServices();
+  }
+
+  Future<void> _loadServices() async {
+    final services = await ServicesApiService().getServices();
+    final barbers = await BarberApiService().getBarbers();
+    
+    if (mounted) {
+      setState(() {
+        _allServices = services;
+        _barbersCount = barbers.length;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Si selectedTab es 0 ('Todos'), mostramos todos, sino filtramos
     final filteredServices = _selectedTab == 0
         ? _allServices
-        : _allServices.where((s) => s['category'] == _selectedTab).toList();
+        : _allServices.where((s) => s['category_id'] == _selectedTab).toList();
 
     return Scaffold(
       backgroundColor: const Color(
@@ -233,7 +166,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              '15 Servicios',
+                              '\$${_allServices.length} Servicios',
                               style: GoogleFonts.outfit(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -263,7 +196,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              '4 Expertos',
+                              '$_barbersCount Expertos',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xFF1E1E1E),
                                 fontWeight: FontWeight.bold,
@@ -324,24 +257,30 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                       const SizedBox(height: 25),
 
                       // Tarjetas filtradas
-                      ...filteredServices.map((service) {
-                        final isSelected = _selectedServices.contains(service);
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            left: 25,
-                            right: 25,
-                            bottom: 20,
-                          ),
-                          child: _buildServiceCard(
-                            context: context,
-                            service: service,
-                            isSelected: isSelected,
-                            onTap: () => _toggleService(service),
-                          ),
-                        );
-                      }),
+                      if (_isLoading)
+                        const Center(child: Padding(
+                          padding: EdgeInsets.all(40.0),
+                          child: CircularProgressIndicator(color: Color(0xFFD48B41)),
+                        ))
+                      else
+                        ...filteredServices.map((service) {
+                          final isSelected = _selectedServices.contains(service);
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              left: 25,
+                              right: 25,
+                              bottom: 20,
+                            ),
+                            child: _buildServiceCard(
+                              context: context,
+                              service: service,
+                              isSelected: isSelected,
+                              onTap: () => _toggleService(service),
+                            ),
+                          );
+                        }),
 
-                      if (filteredServices.isEmpty)
+                      if (!_isLoading && filteredServices.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.all(40.0),
@@ -354,7 +293,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             ),
                           ),
                         ),
-                    ].animate(interval: 50.ms).fade(duration: 400.ms, curve: Curves.easeOut).slideY(begin: 0.1, curve: Curves.easeOut),
+                    ],
                   ),
                 ),
               );
@@ -422,9 +361,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 MaterialPageRoute(
                   builder: (context) => CheckoutPage(
                     products: _selectedServices,
-                    total: total,
+                    total: _calculateTotal(),
                     isServiceBooking: true,
-                    preSelectedBarberName: widget.preSelectedBarberName,
+                    preSelectedBarberName: widget.preselectedBarber?['name'],
                   ),
                 ),
               );

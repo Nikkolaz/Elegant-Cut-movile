@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/service_card.dart';
-import 'checkout_page.dart';
+import 'book_appointment_page.dart';
 
 class BarberDetailPage extends StatelessWidget {
   final Map<String, dynamic> barber;
@@ -162,30 +163,8 @@ class BarberDetailPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 500),
-                    reverseTransitionDuration: const Duration(milliseconds: 400),
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return CheckoutPage(
-                        products: const [],
-                        total: 0,
-                        isServiceBooking: true,
-                        preSelectedBarberName: barber['name'] as String,
-                      );
-                    },
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-                      return FadeTransition(
-                        opacity: curved,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.08),
-                            end: Offset.zero,
-                          ).animate(curved),
-                          child: child,
-                        ),
-                      );
-                    },
+                  MaterialPageRoute(
+                    builder: (context) => BookAppointmentPage(preselectedBarber: barber),
                   ),
                 );
               },

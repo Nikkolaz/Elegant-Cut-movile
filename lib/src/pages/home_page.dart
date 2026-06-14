@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../api/barber_api_service.dart';
+import '../api/reviews_api_service.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
 import 'book_appointment_page.dart';
-import 'ubicacion_page.dart';
 import 'shop_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,36 +19,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _firstName = 'Usuario';
-  List<Map<String, dynamic>> _notifications = [
-    {
-      'title': 'Recordatorio de cita',
-      'desc': 'Tu cita con Marcus es mañana a las 10:00 AM.',
-      'time': 'Hace 2h',
-      'icon': Icons.calendar_today_rounded,
-      'color': const Color(0xFF4A90E2),
-    },
-    {
-      'title': 'Nueva promoción',
-      'desc': '¡20% de descuento en todos los servicios de barba esta semana!',
-      'time': 'Hace 5h',
-      'icon': Icons.local_offer_outlined,
-      'color': const Color(0xFF50C878),
-    },
-    {
-      'title': 'Puntos acumulados',
-      'desc': '¡Has ganado 50 puntos por tu último corte! Sigue así.',
-      'time': 'Ayer',
-      'icon': Icons.stars_rounded,
-      'color': const Color(0xFFFFD56B),
-    },
-    {
-      'title': 'Perfil actualizado',
-      'desc': 'Tu información de perfil ha sido actualizada correctamente.',
-      'time': 'Hace 2 días',
-      'icon': Icons.person_outline_rounded,
-      'color': Colors.grey,
-    },
-  ];
 
   @override
   void initState() {
@@ -78,10 +49,6 @@ class _HomePageState extends State<HomePage> {
             children: [
               const SizedBox(height: 20),
               _buildHeader(context, isDark),
-              const SizedBox(height: 30),
-              
-              _buildPromoBanner(isDark),
-              
               const SizedBox(height: 35),
               
               Text(
@@ -100,18 +67,16 @@ class _HomePageState extends State<HomePage> {
               
               _buildExpertSection(context, isDark),
               
-              _buildNextAppointment(isDark),
-              
               const SizedBox(height: 40),
               
               _buildReviewsSection(isDark),
               
               const SizedBox(height: 40),
               
-              _buildGallerySection(isDark),
+              _buildNextAppointment(isDark),
               
               const SizedBox(height: 120),
-            ].animate(interval: 100.ms).fade(duration: 600.ms, curve: Curves.easeOut).slideY(begin: 0.1, curve: Curves.easeOut),
+            ],
           ),
         ),
       ),
@@ -149,19 +114,18 @@ class _HomePageState extends State<HomePage> {
             child: Stack(
               children: [
                 Icon(Icons.notifications_none_rounded, color: isDark ? Colors.white : Colors.black87),
-                if (_notifications.isNotEmpty)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF6B6B),
-                        shape: BoxShape.circle,
-                      ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF6B6B),
+                      shape: BoxShape.circle,
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -178,96 +142,98 @@ class _HomePageState extends State<HomePage> {
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 600),
       pageBuilder: (context, anim1, anim2) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.75,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 15),
-                      Container(
-                        width: 40,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Notificaciones',
-                              style: GoogleFonts.outfit(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            if (_notifications.isNotEmpty)
-                              TextButton(
-                                onPressed: () {
-                                  setModalState(() {
-                                    _notifications.clear();
-                                  });
-                                  setState(() {});
-                                },
-                                child: Text(
-                                  'Limpiar',
-                                  style: GoogleFonts.outfit(color: const Color(0xFFD48B41)),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Expanded(
-                        child: _notifications.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'No hay notificaciones',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 25),
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: _notifications.length,
-                                itemBuilder: (context, index) {
-                                  final notif = _notifications[index];
-                                  return _buildNotificationItem(
-                                    notif['title'],
-                                    notif['desc'],
-                                    notif['time'],
-                                    notif['icon'],
-                                    notif['color'],
-                                    isDark,
-                                  );
-                                },
-                              ),
-                      ),
-                      const SizedBox(height: 30),
-                    ],
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  const SizedBox(height: 15),
+                  Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 25),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Notificaciones',
+                          style: GoogleFonts.outfit(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Limpiar',
+                            style: GoogleFonts.outfit(color: const Color(0xFFD48B41)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        _buildNotificationItem(
+                          'Recordatorio de cita',
+                          'Tu cita con Marcus es mañana a las 10:00 AM.',
+                          'Hace 2h',
+                          Icons.calendar_today_rounded,
+                          const Color(0xFF4A90E2),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Nueva promoción',
+                          '¡20% de descuento en todos los servicios de barba esta semana!',
+                          'Hace 5h',
+                          Icons.local_offer_outlined,
+                          const Color(0xFF50C878),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Puntos acumulados',
+                          '¡Has ganado 50 puntos por tu último corte! Sigue así.',
+                          'Ayer',
+                          Icons.stars_rounded,
+                          const Color(0xFFFFD56B),
+                          isDark,
+                        ),
+                        _buildNotificationItem(
+                          'Perfil actualizado',
+                          'Tu información de perfil ha sido actualizada correctamente.',
+                          'Hace 2 días',
+                          Icons.person_outline_rounded,
+                          Colors.grey,
+                          isDark,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         );
       },
       transitionBuilder: (context, anim1, anim2, child) {
@@ -399,13 +365,9 @@ class _HomePageState extends State<HomePage> {
               const Color(0xFFFFE8E8),
               const Color(0xFFFF6B6B),
               isDark,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UbicacionPage()),
-                );
-              },
             ),
+            const SizedBox(width: 20),
+            const Expanded(child: SizedBox()), // Placeholder for consistent layout
           ],
         ),
       ],
@@ -451,13 +413,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildExpertSection(BuildContext context, bool isDark) {
-    final experts = [
-      {'name': 'Marcus', 'color': const Color(0xFF98E68E), 'expression': 0},
-      {'name': 'Alex', 'color': const Color(0xFFFFB2D1), 'expression': 1},
-      {'name': 'Julian', 'color': const Color(0xFF88C9F9), 'expression': 3},
-      {'name': 'Daniel', 'color': const Color(0xFFFFD56B), 'expression': 2},
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -470,68 +425,200 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 20),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 65,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade200,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.add, color: isDark ? Colors.white : Colors.black54),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: BarberApiService().getBarbers(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator(color: Color(0xFFD48B41))),
+              );
+            }
+            
+            final allExperts = snapshot.data ?? [];
+            final experts = allExperts.take(5).toList();
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 65,
+                          height: 65,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.add, color: isDark ? Colors.white : Colors.black54),
+                        ),
+                        const SizedBox(height: 10),
+                        Text('Favorito', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text('Favorito', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              ...experts.map((exp) => Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BarberDetailPage(
-                          barber: {
-                            'name': exp['name'] as String,
-                            'color': exp['color'],
-                            'expression': exp['expression'],
-                          },
+                  ),
+                  if (experts.isEmpty)
+                    Text('No hay expertos disponibles.', style: GoogleFonts.outfit(color: Colors.grey)),
+                  ...experts.map((exp) {
+                    final colorHex = [0xFF98E68E, 0xFFFFB2D1, 0xFF88C9F9, 0xFFFFD56B];
+                    final color = Color(colorHex[experts.indexOf(exp) % colorHex.length]);
+                    final expression = experts.indexOf(exp) % 4;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BarberDetailPage(
+                                barber: {
+                                  'id': exp['id'],
+                                  'name': exp['name'],
+                                  'color': color,
+                                  'expression': expression,
+                                  'specialties': exp['specialties'],
+                                  'rating': exp['rating'],
+                                  'reviews': exp['reviews'],
+                                  'experience': exp['experience'],
+                                  'isAvailable': exp['isAvailable'],
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: 65,
+                              height: 65,
+                              child: Hero(
+                                tag: 'barber_hero_${exp['name']}',
+                                child: CaritaWidget(
+                                  size: 65,
+                                  color: color,
+                                  expressionType: expression,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(exp['name'] as String, style: GoogleFonts.outfit(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
+                          ],
                         ),
                       ),
                     );
-                  },
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: 65,
-                        height: 65,
-                        child: Hero(
-                          tag: 'barber_hero_${exp['name']}',
-                          child: CaritaWidget(
-                            size: 65,
-                            color: exp['color'] as Color,
-                            expressionType: exp['expression'] as int,
+                  }),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewsSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Reseñas Recientes',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            Text(
+              'Ver todas',
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: const Color(0xFFD48B41),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: ReviewsApiService().getReviews(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator(color: Color(0xFFD48B41))),
+              );
+            }
+            final reviews = snapshot.data ?? [];
+            if (reviews.isEmpty) {
+              return Text('No hay reseñas recientes.', style: GoogleFonts.outfit(color: Colors.grey));
+            }
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: reviews.take(3).map((review) {
+                  return Container(
+                    width: 250,
+                    margin: const EdgeInsets.only(right: 15),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        if (!isDark)
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
                           ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person, color: Colors.grey),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                review['name'] ?? 'Usuario',
+                                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
+                              ),
+                            ),
+                            Row(
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index < (review['rating'] ?? 5) ? Icons.star : Icons.star_border,
+                                  color: const Color(0xFFFFD56B),
+                                  size: 14,
+                                );
+                              }),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(exp['name'] as String, style: GoogleFonts.outfit(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
-                    ],
-                  ),
-                ),
-              )),
-            ],
-          ),
+                        const SizedBox(height: 10),
+                        Text(
+                          review['comment'] ?? '',
+                          style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -593,329 +680,6 @@ class _HomePageState extends State<HomePage> {
               ),
               const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReviewsSection(bool isDark) {
-    final reviews = [
-      {
-        'name': 'Carlos Mendoza',
-        'rating': 5,
-        'comment': 'El mejor servicio de la ciudad, Marcus siempre sabe exactamente qué estilo me queda bien. Las instalaciones son increíbles.',
-        'time': 'Hace 2 días',
-      },
-      {
-        'name': 'Andrés Gómez',
-        'rating': 5,
-        'comment': 'Ambiente premium y atención de primera. Recomendado al 100%. Definitivamente mi barbería de confianza.',
-        'time': 'Hace 1 semana',
-      },
-      {
-        'name': 'Felipe R.',
-        'rating': 4,
-        'comment': 'Muy buen corte y la tienda tiene productos excelentes para cuidar la barba. Me gustó mucho la experiencia.',
-        'time': 'Hace 2 semanas',
-      },
-      {
-        'name': 'David S.',
-        'rating': 5,
-        'comment': 'Desde que entras te atienden como un rey. Me ofrecieron algo de tomar y el corte quedó impecable.',
-        'time': 'Hace 1 mes',
-      },
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Reseñas Recientes',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-            Row(
-              children: [
-                Icon(Icons.star_rounded, color: const Color(0xFFD48B41), size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  '4.9',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-                Text(
-                  ' (124)',
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 180,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            physics: const BouncingScrollPhysics(),
-            itemCount: reviews.length,
-            itemBuilder: (context, index) {
-              final review = reviews[index];
-              return Container(
-                width: 290,
-                margin: const EdgeInsets.only(right: 20),
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.03),
-                  ),
-                  boxShadow: [
-                    if (!isDark)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          review['name'] as String,
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        Row(
-                          children: List.generate(
-                            5,
-                            (i) => Icon(
-                              Icons.star_rounded,
-                              size: 16,
-                              color: i < (review['rating'] as int)
-                                  ? const Color(0xFFD48B41)
-                                  : Colors.grey.withOpacity(0.3),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: Text(
-                        '"${review['comment']}"',
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                          height: 1.4,
-                          fontStyle: FontStyle.italic,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      review['time'] as String,
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: const Color(0xFFD48B41),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPromoBanner(bool isDark) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFD48B41).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD48B41).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'OFERTA ESPECIAL',
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xFFD48B41),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              Text(
-                '20% Dto.\nen Barba Clásica',
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 15),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD48B41),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(
-                    'Reclamar ahora',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            right: -10,
-            bottom: -10,
-            child: Icon(
-              Icons.content_cut_rounded,
-              size: 100,
-              color: Colors.white.withOpacity(0.05),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGallerySection(bool isDark) {
-    final styles = [
-      {'title': 'Fade Clásico', 'icon': Icons.waves_rounded, 'color': const Color(0xFF4A90E2)},
-      {'title': 'Barba Premium', 'icon': Icons.face_rounded, 'color': const Color(0xFFD48B41)},
-      {'title': 'Militar', 'icon': Icons.shield_rounded, 'color': const Color(0xFF50C878)},
-      {'title': 'Diseño Libre', 'icon': Icons.brush_rounded, 'color': const Color(0xFFFF6B6B)},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Tendencias de la Semana',
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 140,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: styles.length,
-            itemBuilder: (context, index) {
-              final style = styles[index];
-              return Container(
-                width: 120,
-                margin: const EdgeInsets.only(right: 15),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.04),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: (style['color'] as Color).withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        style['icon'] as IconData,
-                        color: style['color'] as Color,
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      style['title'] as String,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         ),
       ],

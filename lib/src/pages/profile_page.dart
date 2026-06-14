@@ -155,6 +155,9 @@ class _ProfilePageState extends State<ProfilePage>
             final prefs = await SharedPreferences.getInstance();
             await prefs.remove('firstName');
             await prefs.remove('username');
+            await prefs.remove('email');
+            await prefs.remove('token');
+            await prefs.remove('id_usuario');
             if (!mounted) return;
             Navigator.pushAndRemoveUntil(context,
                 MaterialPageRoute(builder: (_) => const LoginPage()),
