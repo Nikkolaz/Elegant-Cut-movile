@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
 import 'checkout_page.dart';
 
 class BookAppointmentPage extends StatefulWidget {
-  const BookAppointmentPage({super.key});
+  final String? preSelectedBarberName;
+
+  const BookAppointmentPage({super.key, this.preSelectedBarberName});
 
   @override
   State<BookAppointmentPage> createState() => _BookAppointmentPageState();
@@ -350,7 +354,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             ),
                           ),
                         ),
-                    ],
+                    ].animate(interval: 50.ms).fade(duration: 400.ms, curve: Curves.easeOut).slideY(begin: 0.1, curve: Curves.easeOut),
                   ),
                 ),
               );
@@ -420,6 +424,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     products: _selectedServices,
                     total: total,
                     isServiceBooking: true,
+                    preSelectedBarberName: widget.preSelectedBarberName,
                   ),
                 ),
               );

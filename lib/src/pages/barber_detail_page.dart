@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/service_card.dart';
+import 'checkout_page.dart';
 
 class BarberDetailPage extends StatelessWidget {
   final Map<String, dynamic> barber;
@@ -158,7 +159,36 @@ class BarberDetailPage extends StatelessWidget {
             left: 30,
             right: 30,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 500),
+                    reverseTransitionDuration: const Duration(milliseconds: 400),
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return CheckoutPage(
+                        products: const [],
+                        total: 0,
+                        isServiceBooking: true,
+                        preSelectedBarberName: barber['name'] as String,
+                      );
+                    },
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+                      return FadeTransition(
+                        opacity: curved,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.08),
+                            end: Offset.zero,
+                          ).animate(curved),
+                          child: child,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD48B41),
                 foregroundColor: Colors.white,

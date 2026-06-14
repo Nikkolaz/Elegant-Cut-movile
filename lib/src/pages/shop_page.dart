@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
 import 'checkout_page.dart';
 
@@ -232,7 +233,7 @@ class _ShopPageState extends State<ShopPage> {
                           child: _buildProductCard(product, isSelected),
                         );
                       }),
-                    ],
+                    ].animate(interval: 50.ms).fade(duration: 400.ms, curve: Curves.easeOut).slideY(begin: 0.1, curve: Curves.easeOut),
                   ),
                 ),
               );
