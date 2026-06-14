@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:elegant_cut_mobile/main.dart';
-import 'package:elegant_cut_mobile/src/pages/login_page.dart';
 import 'package:elegant_cut_mobile/src/widgets/settings_tile.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -73,13 +74,13 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.email_outlined,
               title: 'Actualizar Correo',
               subtitle: 'sandra.glam@example.com',
-              onTap: () {},
+              onTap: _showEmailDialog,
             ),
             SettingsTile(
               icon: Icons.lock_outline,
               title: 'Cambiar Contraseña',
               subtitle: 'Último cambio hace 3 meses',
-              onTap: () {},
+              onTap: _showPasswordDialog,
             ),
             
             const SizedBox(height: 20),
@@ -143,13 +144,13 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.security_outlined,
               color: Colors.green,
               title: 'Privacidad y Seguridad',
-              onTap: () {},
+              onTap: () => _showSnackbar('Cargando panel de privacidad...'),
             ),
             SettingsTile(
               icon: Icons.block_flipped,
               color: Colors.redAccent,
               title: 'Barberos Bloqueados',
-              onTap: () {},
+              onTap: () => _showSnackbar('No tienes barberos bloqueados.'),
             ),
             
             const SizedBox(height: 20),
@@ -160,26 +161,26 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.info_outline,
               color: Colors.blue,
               title: 'Términos de Servicio',
-              onTap: () {},
+              onTap: () => _showSnackbar('Abriendo términos de servicio...'),
             ),
             SettingsTile(
               icon: Icons.privacy_tip_outlined,
               color: Colors.teal,
               title: 'Política de Privacidad',
-              onTap: () {},
+              onTap: () => _showSnackbar('Abriendo política de privacidad...'),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               child: Text(
                 'Versión 1.0.2 (Build 2405)',
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                style: GoogleFonts.outfit(color: Colors.grey.shade500, fontSize: 12),
               ),
             ),
             
             const SizedBox(height: 20),
             
             const SizedBox(height: 40),
-          ],
+          ].animate(interval: 40.ms).fade(duration: 300.ms, curve: Curves.easeOut).slideX(begin: 0.05, curve: Curves.easeOut),
         ),
       ),
     );
@@ -208,6 +209,127 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(icon, color: color, size: 22),
+    );
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.outfit()),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: const Color(0xFF1E1E1E),
+      ),
+    );
+  }
+
+  void _showEmailDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Actualizar Correo', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+          content: TextField(
+            style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Nuevo correo electrónico',
+              hintStyle: GoogleFonts.outfit(color: Colors.grey),
+              filled: true,
+              fillColor: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Color(0xFFD48B41), width: 2),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar', style: GoogleFonts.outfit(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _showSnackbar('Correo actualizado (simulado)');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD48B41),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+              child: Text('Guardar', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPasswordDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Cambiar Contraseña', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                obscureText: true,
+                style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black87),
+                decoration: InputDecoration(
+                  hintText: 'Contraseña actual',
+                  hintStyle: GoogleFonts.outfit(color: Colors.grey),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                obscureText: true,
+                style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black87),
+                decoration: InputDecoration(
+                  hintText: 'Nueva contraseña',
+                  hintStyle: GoogleFonts.outfit(color: Colors.grey),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Color(0xFFD48B41), width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar', style: GoogleFonts.outfit(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _showSnackbar('Contraseña actualizada (simulada)');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD48B41),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+              child: Text('Guardar', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
   }
 }
