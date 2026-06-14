@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../api/barber_api_service.dart';
+import '../api/reviews_api_service.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
@@ -62,6 +65,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 40),
               
               _buildExpertSection(context, isDark),
+              
+              const SizedBox(height: 40),
+              
+              _buildReviewsSection(isDark),
               
               const SizedBox(height: 40),
               
@@ -406,13 +413,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildExpertSection(BuildContext context, bool isDark) {
-    final experts = [
-      {'name': 'Marcus', 'color': const Color(0xFF98E68E), 'expression': 0},
-      {'name': 'Alex', 'color': const Color(0xFFFFB2D1), 'expression': 1},
-      {'name': 'Julian', 'color': const Color(0xFF88C9F9), 'expression': 3},
-      {'name': 'Daniel', 'color': const Color(0xFFFFD56B), 'expression': 2},
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -425,68 +425,95 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 20),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 65,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade200,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.add, color: isDark ? Colors.white : Colors.black54),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: BarberApiService().getBarbers(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator(color: Color(0xFFD48B41))),
+              );
+            }
+            
+            final allExperts = snapshot.data ?? [];
+            final experts = allExperts.take(5).toList();
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 65,
+                          height: 65,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1C1C1E) : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.add, color: isDark ? Colors.white : Colors.black54),
+                        ),
+                        const SizedBox(height: 10),
+                        Text('Favorito', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text('Favorito', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              ...experts.map((exp) => Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BarberDetailPage(
-                          barber: {
-                            'name': exp['name'] as String,
-                            'color': exp['color'],
-                            'expression': exp['expression'],
-                          },
+                  ),
+                  if (experts.isEmpty)
+                    Text('No hay expertos disponibles.', style: GoogleFonts.outfit(color: Colors.grey)),
+                  ...experts.map((exp) {
+                    final colorHex = [0xFF98E68E, 0xFFFFB2D1, 0xFF88C9F9, 0xFFFFD56B];
+                    final color = Color(colorHex[experts.indexOf(exp) % colorHex.length]);
+                    final expression = experts.indexOf(exp) % 4;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BarberDetailPage(
+                                barber: {
+                                  'id': exp['id'],
+                                  'name': exp['name'],
+                                  'color': color,
+                                  'expression': expression,
+                                  'specialties': exp['specialties'],
+                                  'rating': exp['rating'],
+                                  'reviews': exp['reviews'],
+                                  'experience': exp['experience'],
+                                  'isAvailable': exp['isAvailable'],
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: 65,
+                              height: 65,
+                              child: Hero(
+                                tag: 'barber_hero_${exp['name']}',
+                                child: CaritaWidget(
+                                  size: 65,
+                                  color: color,
+                                  expressionType: expression,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(exp['name'] as String, style: GoogleFonts.outfit(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
+                          ],
                         ),
                       ),
                     );
-                  },
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: 65,
-                        height: 65,
-                        child: Hero(
-                          tag: 'barber_hero_${exp['name']}',
-                          child: CaritaWidget(
-                            size: 65,
-                            color: exp['color'] as Color,
-                            expressionType: exp['expression'] as int,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(exp['name'] as String, style: GoogleFonts.outfit(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
-                    ],
-                  ),
-                ),
-              )),
-            ],
-          ),
+                  }),
+                ],
+              ),
         ),
       ],
     );
