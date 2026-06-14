@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
+import '../api/services_api_service.dart';
 import 'checkout_page.dart';
 
 class ShopPage extends StatefulWidget {
@@ -22,73 +23,24 @@ class _ShopPageState extends State<ShopPage> {
     {'name': 'Accesorios', 'icon': Icons.watch_rounded},
   ];
 
-  final List<Map<String, dynamic>> _products = [
-    {
-      'id': 1,
-      'category': 1, // Cabello
-      'bgColor': const Color(0xFF2C2C2E),
-      'tagText': 'MÁS VENDIDO',
-      'tagColor': const Color(0xFFD48B41),
-      'title': 'Pomada Mate Premium',
-      'titleColor': Colors.white,
-      'iconData': Icons.opacity_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.1),
-      'iconColor': const Color(0xFFD48B41),
-      'price': r'$25',
-    },
-    {
-      'id': 2,
-      'category': 2, // Barba
-      'bgColor': const Color(0xFF88C9F9),
-      'tagText': 'HIDRATACIÓN',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Aceite de Sándalo',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.water_drop_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': r'$18',
-    },
-    {
-      'id': 3,
-      'category': 1, // Cabello
-      'bgColor': const Color(0xFFB4B0FE),
-      'tagText': 'FIJACIÓN FUERTE',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Cera de Arcilla',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.layers_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.3),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': r'$22',
-    },
-    {
-      'id': 4,
-      'category': 3, // Accesorios
-      'bgColor': const Color(0xFFFFD56B),
-      'tagText': 'EDICIÓN LIMITADA',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Peine de Madera',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.reorder_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': r'$12',
-    },
-    {
-      'id': 5,
-      'category': 2, // Barba
-      'bgColor': const Color(0xFF98E68E),
-      'tagText': 'LIMPIEZA',
-      'tagColor': const Color(0xFF2C2C2E).withOpacity(0.6),
-      'title': 'Champú para Barba',
-      'titleColor': const Color(0xFF1E1E1E),
-      'iconData': Icons.clean_hands_rounded,
-      'iconBgColor': Colors.white.withOpacity(0.4),
-      'iconColor': const Color(0xFF1E1E1E),
-      'price': r'$15',
-    },
-  ];
+  List<Map<String, dynamic>> _products = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    final services = await ServicesApiService().getServices();
+    if (mounted) {
+      setState(() {
+        _products = services;
+        _isLoading = false;
+      });
+    }
+  }
 
   void _toggleProduct(Map<String, dynamic> product) {
     setState(() {
@@ -222,7 +174,25 @@ class _ShopPageState extends State<ShopPage> {
                       const SizedBox(height: 25),
 
                       // Productos
-                      ...filteredProducts.map((product) {
+                      if (_isLoading)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(40.0),
+                            child: CircularProgressIndicator(color: Color(0xFFD48B41)),
+                          ),
+                        )
+                      else if (filteredProducts.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Text(
+                              'Próximamente más productos',
+                              style: GoogleFonts.outfit(color: Colors.grey, fontSize: 16),
+                            ),
+                          ),
+                        )
+                      else
+                        ...filteredProducts.map((product) {
                         final isSelected = _selectedProducts.contains(product);
                         return Padding(
                           padding: const EdgeInsets.only(
@@ -458,6 +428,7 @@ class _ShopPageState extends State<ShopPage> {
                   builder: (context) => CheckoutPage(
                     products: _selectedProducts,
                     total: total,
+                    isServiceBooking: true,
                   ),
                 ),
               );

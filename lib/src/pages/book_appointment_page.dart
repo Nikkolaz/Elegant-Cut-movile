@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/carita_widget.dart';
 import '../api/services_api_service.dart';
+import '../api/barber_api_service.dart';
 import 'checkout_page.dart';
 
 class BookAppointmentPage extends StatefulWidget {
@@ -46,6 +47,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   ];
 
   List<Map<String, dynamic>> _allServices = [];
+  int _barbersCount = 0;
   bool _isLoading = true;
 
   @override
@@ -56,10 +58,15 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   Future<void> _loadServices() async {
     final services = await ServicesApiService().getServices();
-    setState(() {
-      _allServices = services;
-      _isLoading = false;
-    });
+    final barbers = await BarberApiService().getBarbers();
+    
+    if (mounted) {
+      setState(() {
+        _allServices = services;
+        _barbersCount = barbers.length;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -189,7 +196,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              '4 Expertos',
+                              '$_barbersCount Expertos',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xFF1E1E1E),
                                 fontWeight: FontWeight.bold,
@@ -353,9 +360,10 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CheckoutPage(
-                    selectedServices: _selectedServices,
-                    totalAmount: _calculateTotal(),
-                    preselectedBarber: widget.preselectedBarber,
+                    products: _selectedServices,
+                    total: _calculateTotal(),
+                    isServiceBooking: true,
+                    preSelectedBarberName: widget.preselectedBarber?['name'],
                   ),
                 ),
               );

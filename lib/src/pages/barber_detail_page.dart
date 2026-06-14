@@ -164,7 +164,7 @@ class BarberDetailPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BookAppointmentPage(preselectedBarber: widget.barber),
+                    builder: (context) => BookAppointmentPage(preselectedBarber: barber),
                   ),
                 );
               },

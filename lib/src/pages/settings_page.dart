@@ -71,9 +71,9 @@ class _SettingsPageState extends State<SettingsPage> {
             // Sección: Cuenta
             _buildSectionHeader('CUENTA'),
             SettingsTile(
-              icon: Icons.email_outlined,
-              title: 'Actualizar Correo',
-              subtitle: 'sandra.glam@example.com',
+              icon: Icons.person_outline,
+              title: 'Cambiar Username',
+              subtitle: 'sandra_glam',
               onTap: _showEmailDialog,
             ),
             SettingsTile(
@@ -231,11 +231,11 @@ class _SettingsPageState extends State<SettingsPage> {
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Actualizar Correo', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+          title: Text('Cambiar Username', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
           content: TextField(
             style: GoogleFonts.outfit(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
-              hintText: 'Nuevo correo electrónico',
+              hintText: 'Nuevo nombre de usuario',
               hintStyle: GoogleFonts.outfit(color: Colors.grey),
               filled: true,
               fillColor: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
@@ -254,7 +254,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                _showSnackbar('Correo actualizado (simulado)');
+                _showSnackbar('Username actualizado (simulado)');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD48B41),

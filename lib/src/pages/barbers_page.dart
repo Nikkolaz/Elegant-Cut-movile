@@ -81,7 +81,7 @@ class _BarbersPageState extends State<BarbersPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       itemCount: topBarbers.length,
                       itemBuilder: (context, index) {
-                        return _buildFeaturedCard(topBarbers[index], isDark);
+                        return _buildFeaturedCard(context, topBarbers[index], isDark);
                       },
                     ),
                   ),
@@ -146,7 +146,7 @@ class _BarbersPageState extends State<BarbersPage> {
                           ),
                         )
                       : Column(
-                          children: filteredBarbers.map((barber) => _buildListItem(barber, isDark)).toList(),
+                          children: filteredBarbers.map((barber) => _buildListItem(context, barber, isDark)).toList(),
                         ),
                   ),
                   const SizedBox(height: 100),
@@ -198,15 +198,24 @@ class _BarbersPageState extends State<BarbersPage> {
     );
   }
 
-  Widget _buildFeaturedCard(Map<String, dynamic> barber, bool isDark) {
-    return Container(
-      width: 170,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Column(
+  Widget _buildFeaturedCard(BuildContext context, Map<String, dynamic> barber, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BarberDetailPage(barber: barber),
+          ),
+        );
+      },
+      child: Container(
+        width: 170,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Column(
         children: [
           const SizedBox(height: 15),
           SizedBox(
@@ -259,7 +268,7 @@ class _BarbersPageState extends State<BarbersPage> {
                   ],
                 ),
                 Text(
-                  barber['price'] ?? '$0',
+                  barber['price'] ?? '\$0',
                   style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -267,18 +276,27 @@ class _BarbersPageState extends State<BarbersPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 
-  Widget _buildListItem(Map<String, dynamic> barber, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
+  Widget _buildListItem(BuildContext context, Map<String, dynamic> barber, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BarberDetailPage(barber: barber),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Row(
         children: [
           Container(
             width: 60,
@@ -346,6 +364,6 @@ class _BarbersPageState extends State<BarbersPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 }

@@ -8,6 +8,7 @@ import '../widgets/carita_widget.dart';
 import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
 import 'book_appointment_page.dart';
+import 'shop_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -345,21 +346,18 @@ class _HomePageState extends State<HomePage> {
               const Color(0xFFE8FFEF),
               const Color(0xFF50C878),
               isDark,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ShopPage()),
+                );
+              },
             ),
           ],
         ),
         const SizedBox(height: 20),
         Row(
           children: [
-            _buildActionCard(
-              'Cortes',
-              'Mira las tendencias',
-              Icons.content_cut_rounded,
-              const Color(0xFFFFF8E1),
-              const Color(0xFFF5A623),
-              isDark,
-            ),
-            const SizedBox(width: 20),
             _buildActionCard(
               'Ubicación',
               '¿Cómo llegar?',
@@ -368,6 +366,8 @@ class _HomePageState extends State<HomePage> {
               const Color(0xFFFF6B6B),
               isDark,
             ),
+            const SizedBox(width: 20),
+            const Expanded(child: SizedBox()), // Placeholder for consistent layout
           ],
         ),
       ],
@@ -514,6 +514,111 @@ class _HomePageState extends State<HomePage> {
                   }),
                 ],
               ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewsSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Reseñas Recientes',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            Text(
+              'Ver todas',
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: const Color(0xFFD48B41),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: ReviewsApiService().getReviews(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator(color: Color(0xFFD48B41))),
+              );
+            }
+            final reviews = snapshot.data ?? [];
+            if (reviews.isEmpty) {
+              return Text('No hay reseñas recientes.', style: GoogleFonts.outfit(color: Colors.grey));
+            }
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: reviews.take(3).map((review) {
+                  return Container(
+                    width: 250,
+                    margin: const EdgeInsets.only(right: 15),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        if (!isDark)
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person, color: Colors.grey),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                review['name'] ?? 'Usuario',
+                                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
+                              ),
+                            ),
+                            Row(
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index < (review['rating'] ?? 5) ? Icons.star : Icons.star_border,
+                                  color: const Color(0xFFFFD56B),
+                                  size: 14,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          review['comment'] ?? '',
+                          style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );

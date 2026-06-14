@@ -64,6 +64,8 @@ class _LoginPageState extends State<LoginPage> {
       final userData = result['user'];
       
       // Guardamos el nombre real y el username
+      await prefs.setString('token', result['token'] ?? '');
+      await prefs.setInt('id_usuario', userData['id_usuario'] ?? userData['id'] ?? 1);
       await prefs.setString('firstName', userData['prim_nombre'] ?? 'Usuario');
       await prefs.setString('username', userData['username'] ?? '');
       await prefs.setString('email', userData['email'] ?? '');
@@ -118,6 +120,8 @@ class _LoginPageState extends State<LoginPage> {
           final prefs = await SharedPreferences.getInstance();
           final userData = result['user'];
 
+          await prefs.setString('token', result['token'] ?? '');
+          await prefs.setInt('id_usuario', userData['id_usuario'] ?? userData['id'] ?? 1);
           await prefs.setString(
               'firstName', userData['prim_nombre'] ?? 'Usuario');
           await prefs.setString('username', userData['username'] ?? '');
