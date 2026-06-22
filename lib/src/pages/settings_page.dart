@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:elegant_cut_mobile/main.dart';
 import 'package:elegant_cut_mobile/src/widgets/settings_tile.dart';
+import 'package:elegant_cut_mobile/src/pages/pqrs_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -151,6 +152,23 @@ class _SettingsPageState extends State<SettingsPage> {
               color: Colors.redAccent,
               title: 'Barberos Bloqueados',
               onTap: () => _showSnackbar('No tienes barberos bloqueados.'),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Sección: Soporte
+            _buildSectionHeader('SOPORTE Y AYUDA'),
+            SettingsTile(
+              icon: Icons.support_agent_outlined,
+              color: Colors.blueAccent,
+              title: 'Buzón PQRS',
+              subtitle: 'Peticiones, Quejas, Reclamos y Sugerencias',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PqrsPage()),
+                );
+              },
             ),
             
             const SizedBox(height: 20),
