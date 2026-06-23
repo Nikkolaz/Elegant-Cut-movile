@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/src/pages/register_page.dart';
 import 'package:elegant_cut_mobile/src/pages/index_page.dart';
+import 'package:elegant_cut_mobile/src/pages/admin/admin_index_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../api/auth_service.dart';
 import '../widgets/carita_widget.dart';
@@ -64,6 +65,12 @@ class _LoginPageState extends State<LoginPage> {
       final userData = result['user'];
       
       // Guardamos el nombre real y el username
+      await prefs.setString('token', result['token'] ?? '');
+      await prefs.setInt('id_usuario', userData['id_usuario'] ?? userData['id'] ?? 1);
+      
+      final int idRol = userData['id_rol'] ?? 2; // Asumimos cliente (2) si es nulo
+      await prefs.setInt('id_rol', idRol);
+      
       await prefs.setString('firstName', userData['prim_nombre'] ?? 'Usuario');
       await prefs.setString('username', userData['username'] ?? '');
       await prefs.setString('email', userData['email'] ?? '');
@@ -74,10 +81,18 @@ class _LoginPageState extends State<LoginPage> {
         result['message'],
         ToastType.success,
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const IndexPage()),
-      );
+      
+      if (idRol == 1) { // 1 es Administrador
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminIndexPage()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const IndexPage()),
+        );
+      }
     } else {
       if (!mounted) return;
       CustomToast.show(
@@ -118,6 +133,12 @@ class _LoginPageState extends State<LoginPage> {
           final prefs = await SharedPreferences.getInstance();
           final userData = result['user'];
 
+          await prefs.setString('token', result['token'] ?? '');
+          await prefs.setInt('id_usuario', userData['id_usuario'] ?? userData['id'] ?? 1);
+          
+          final int idRol = userData['id_rol'] ?? 2;
+          await prefs.setInt('id_rol', idRol);
+          
           await prefs.setString(
               'firstName', userData['prim_nombre'] ?? 'Usuario');
           await prefs.setString('username', userData['username'] ?? '');
@@ -129,10 +150,18 @@ class _LoginPageState extends State<LoginPage> {
             result['message'],
             ToastType.success,
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const IndexPage()),
-          );
+          
+          if (idRol == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AdminIndexPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const IndexPage()),
+            );
+          }
         } else {
           if (!mounted) return;
           CustomToast.show(

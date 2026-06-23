@@ -30,7 +30,11 @@ class AuthService {
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Error al iniciar sesión',
+          'message': data['message'] is String
+              ? data['message']
+              : data['message'] is List
+                  ? (data['message'] as List).join(', ')
+                  : 'Error al iniciar sesión',
         };
       }
     } catch (e) {
@@ -118,7 +122,11 @@ class AuthService {
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Error con Google'
+          'message': data['message'] is String
+              ? data['message']
+              : data['message'] is List
+                  ? (data['message'] as List).join(', ')
+                  : 'Error con Google'
         };
       }
     } catch (e) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/carita_widget.dart';
 import '../widgets/service_card.dart';
+import 'book_appointment_page.dart';
 
 class BarberDetailPage extends StatelessWidget {
   final Map<String, dynamic> barber;
@@ -158,7 +160,14 @@ class BarberDetailPage extends StatelessWidget {
             left: 30,
             right: 30,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookAppointmentPage(preselectedBarber: barber),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD48B41),
                 foregroundColor: Colors.white,
