@@ -10,22 +10,23 @@ class BookingApiService {
     required int barberId,
     required List<int> serviceIds,
     required DateTime date,
-    required int horaInicio,
-    required int horaFin,
+    required int idHorario,
     required String observaciones,
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('id_usuario') ?? 1;
 
+      final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
       final body = {
         'id_empleado': barberId,
-        'id_usuario': userId, // Real logged-in user
-        'fecha': "\${date.year}-\${date.month.toString().padLeft(2, '0')}-\${date.day.toString().padLeft(2, '0')}", // YYYY-MM-DD
+        'id_usuario': userId,
+        'fecha': dateStr,
         'observaciones': observaciones,
-        'id_horarios': horaInicio + 1, // Map time slot index to ID
-        'id_estado_cita': 1, // Pending
-        'id_servicio': serviceIds.isNotEmpty ? serviceIds.first : 1, // DTO expects single id_servicio
+        'id_horarios': idHorario,
+        'id_estado_cita': 1,
+        'id_servicio': serviceIds.isNotEmpty ? serviceIds.first : 1,
       };
 
       final response = await _api.post(
@@ -39,8 +40,51 @@ class BookingApiService {
       print('Error en createAppointment: ${response.statusCode} - ${response.body}');
       return false;
     } catch (e) {
-      print('BookingApiService error: \$e');
+      print('BookingApiService error: $e');
       return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAvailableSlots(DateTime date, int barberId) async {
+    try {
+      final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final url = '${ApiConstants.baseUrl}/appointments/availability?date=$dateStr&barberId=$barberId';
+      print('DEBUG getAvailableSlots URL: $url');
+
+      final response = await _api.get(Uri.parse(url));
+      print('DEBUG getAvailableSlots response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      }
+      print('Error en getAvailableSlots: ${response.statusCode} - ${response.body}');
+      return [];
+    } catch (e) {
+      print('BookingApiService error getAvailableSlots: $e');
+      return [];
+    }
+  }
+  Future<List<Map<String, dynamic>>> getUserAppointments() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('id_usuario') ?? 1;
+
+      final url = '${ApiConstants.baseUrl}/appointments/user/$userId';
+      final response = await _api.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (responseData['success'] == true && responseData['data'] != null) {
+          final List<dynamic> data = responseData['data'];
+          return data.cast<Map<String, dynamic>>();
+        }
+      }
+      print('Error en getUserAppointments: ${response.statusCode} - ${response.body}');
+      return [];
+    } catch (e) {
+      print('BookingApiService error getUserAppointments: $e');
+      return [];
     }
   }
 }

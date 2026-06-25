@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/rating_slider.dart';
+import '../api/booking_api_service.dart';
 
 class AppointmentsPage extends StatefulWidget {
   const AppointmentsPage({super.key});
@@ -12,33 +13,28 @@ class AppointmentsPage extends StatefulWidget {
 class _AppointmentsPageState extends State<AppointmentsPage> {
   bool _isIslandExpanded = false;
   bool _remindersEnabled = true;
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _appointments = [];
+  final BookingApiService _bookingApi = BookingApiService();
 
-  final List<Map<String, dynamic>> _completedAppointments = [
-    {
-      'service': 'Corte Moderno',
-      'date': '25 Abr, 2024',
-      'barber': 'Marcus',
-      'status': 'Completado',
-      'icon': Icons.check_circle_outline_rounded,
-      'color': const Color(0xFFA78BFA),
-    },
-    {
-      'service': 'Perfilado de Barba',
-      'date': '10 Abr, 2024',
-      'barber': 'Alex',
-      'status': 'Completado',
-      'icon': Icons.face_retouching_natural,
-      'color': const Color(0xFF60A5FA),
-    },
-    {
-      'service': 'Tratamiento Facial',
-      'date': '02 Abr, 2024',
-      'barber': 'Julian',
-      'status': 'Completado',
-      'icon': Icons.spa_outlined,
-      'color': const Color(0xFFF472B6),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchAppointments();
+  }
+
+  Future<void> _fetchAppointments() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    final appointments = await _bookingApi.getUserAppointments();
+    
+    setState(() {
+      _appointments = appointments;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,19 +129,34 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                           ),
                           const SizedBox(height: 20),
                           
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _completedAppointments.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 15),
-                            itemBuilder: (context, index) {
-                              return _buildAppointmentItem(
-                                _completedAppointments[index], 
-                                isDark,
-                                contentWidth,
-                              );
-                            },
-                          ),
+                          _isLoading
+                              ? const Center(child: Padding(
+                                  padding: EdgeInsets.all(20.0),
+                                  child: CircularProgressIndicator(color: Color(0xFFD48B41)),
+                                ))
+                              : _appointments.isEmpty
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Text(
+                                          'No tienes citas agendadas.',
+                                          style: GoogleFonts.outfit(color: Colors.grey, fontSize: 16),
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.separated(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      itemCount: _appointments.length,
+                                      separatorBuilder: (context, index) => const SizedBox(height: 15),
+                                      itemBuilder: (context, index) {
+                                        return _buildAppointmentItem(
+                                          _appointments[index], 
+                                          isDark,
+                                          contentWidth,
+                                        );
+                                      },
+                                    ),
                           
                           const SizedBox(height: 120),
                         ],
@@ -385,8 +396,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   }
 
   Widget _buildAppointmentItem(Map<String, dynamic> appointment, bool isDark, double width) {
+    // Parse fecha para mostrarla bonito
+    String dateStr = appointment['fecha'] ?? '';
+    if (dateStr.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(dateStr);
+        dateStr = '${dt.day}/${dt.month}/${dt.year}';
+      } catch (_) {}
+    }
+    
+    final bool isPendiente = appointment['estado'] == 'Pendiente';
+    final Color itemColor = isPendiente ? const Color(0xFF60A5FA) : const Color(0xFFA78BFA);
+    final IconData itemIcon = isPendiente ? Icons.calendar_today_rounded : Icons.check_circle_outline_rounded;
+    
     return GestureDetector(
-      onTap: () => _showReviewModal(context, appointment),
+      onTap: () => isPendiente ? null : _showReviewModal(context, appointment),
       child: Container(
         width: width,
         padding: const EdgeInsets.all(15),
@@ -400,10 +424,10 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: appointment['color'].withOpacity(0.1),
+                color: itemColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Icon(appointment['icon'], color: appointment['color']),
+              child: Icon(itemIcon, color: itemColor),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -411,11 +435,11 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    appointment['service'],
+                    appointment['servicio'] ?? 'Servicio',
                     style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Text(
-                    '${appointment['date']} • ${appointment['barber']}',
+                    '$dateStr • ${appointment['hora'] ?? ''}',
                     style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
                   ),
                 ],
@@ -424,13 +448,13 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: isPendiente ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                'Opinar',
+                isPendiente ? 'Pendiente' : 'Opinar',
                 style: GoogleFonts.outfit(
-                  color: Colors.green,
+                  color: isPendiente ? Colors.orange : Colors.green,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),

@@ -9,6 +9,7 @@ import '../widgets/animated_logo_text.dart';
 import 'barber_detail_page.dart';
 import 'book_appointment_page.dart';
 import 'shop_page.dart';
+import '../api/booking_api_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,11 +20,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _firstName = 'Usuario';
+  Map<String, dynamic>? _nextAppointment;
+  final BookingApiService _bookingApi = BookingApiService();
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadNextAppointment();
   }
 
   Future<void> _loadUserData() async {
@@ -31,6 +35,22 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _firstName = prefs.getString('firstName') ?? 'Usuario';
     });
+  }
+
+  Future<void> _loadNextAppointment() async {
+    final appointments = await _bookingApi.getUserAppointments();
+    if (mounted) {
+      try {
+        final pending = appointments.firstWhere((a) => a['estado'] == 'Pendiente');
+        setState(() {
+          _nextAppointment = pending;
+        });
+      } catch (_) {
+        setState(() {
+          _nextAppointment = null;
+        });
+      }
+    }
   }
 
   @override
@@ -625,6 +645,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildNextAppointment(bool isDark) {
+    if (_nextAppointment == null) {
+      return const SizedBox.shrink(); // No mostramos nada si no hay cita pendiente
+    }
+
+    // Formatear datos de la API
+    String dateStr = _nextAppointment!['fecha'] ?? '';
+    if (dateStr.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(dateStr);
+        dateStr = '${dt.day}/${dt.month}/${dt.year}';
+      } catch (_) {}
+    }
+    
+    final String serviceName = _nextAppointment!['servicio'] ?? 'Servicio reservado';
+    // El barbero no viene directamente en el nuevo endpoint a menos que agreguemos un join, 
+    // pero podemos mostrar el estado u hora
+    final String timeStr = _nextAppointment!['hora'] ?? '';
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -668,11 +706,11 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Corte & Barba Premium',
+                      serviceName,
                       style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     Text(
-                      'Mañana, 14:00 PM con Marcus',
+                      '$dateStr, $timeStr',
                       style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
                     ),
                   ],
