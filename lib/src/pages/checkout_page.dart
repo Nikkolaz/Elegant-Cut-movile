@@ -49,26 +49,8 @@ class _CheckoutPageState extends State<CheckoutPage>
   late AnimationController _progressController;
 
   // ── Data ──
-  final List<String> _timeSlots = [
-    '9:00 AM',
-    '9:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '12:00 PM',
-    '1:00 PM',
-    '1:30 PM',
-    '2:00 PM',
-    '2:30 PM',
-    '3:00 PM',
-    '3:30 PM',
-    '4:00 PM',
-    '4:30 PM',
-    '5:00 PM',
-    '5:30 PM',
-    '6:00 PM',
-  ];
+  List<Map<String, dynamic>> _timeSlots = [];
+  bool _isLoadingSlots = false;
 
   List<Map<String, dynamic>> _barbers = [];
   bool _isLoadingBarbers = true;
@@ -166,6 +148,40 @@ class _CheckoutPageState extends State<CheckoutPage>
           }
         }
       });
+      _fetchSlots();
+    }
+  }
+
+  Future<void> _fetchSlots() async {
+    if (_selectedBarber < 0 || _barbers.isEmpty) {
+      print('DEBUG _fetchSlots: Skipping - selectedBarber=$_selectedBarber, barbers=${_barbers.length}');
+      return;
+    }
+    setState(() {
+      _isLoadingSlots = true;
+      _timeSlots = [];
+      _selectedTimeSlot = -1;
+    });
+    
+    try {
+      final barberId = _barbers[_selectedBarber]['id'];
+      print('DEBUG _fetchSlots: barberId=$barberId (type=${barberId.runtimeType}), date=$_selectedDate');
+      final slots = await BookingApiService().getAvailableSlots(_selectedDate, barberId is int ? barberId : int.parse(barberId.toString()));
+      print('DEBUG _fetchSlots: Got ${slots.length} slots');
+      
+      if (mounted) {
+        setState(() {
+          _timeSlots = slots;
+          _isLoadingSlots = false;
+        });
+      }
+    } catch (e) {
+      print('DEBUG _fetchSlots ERROR: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingSlots = false;
+        });
+      }
     }
   }
 
@@ -182,8 +198,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         barberId: _barbers[_selectedBarber]['id'],
         serviceIds: _cartItems.map((s) => s['id'] as int? ?? 1).toList(),
         date: _selectedDate,
-        horaInicio: _selectedTimeSlot,
-        horaFin: _selectedTimeSlot + 1,
+        idHorario: _timeSlots[_selectedTimeSlot]['id'],
         observaciones: _notesController.text,
       );
 
@@ -849,7 +864,10 @@ class _CheckoutPageState extends State<CheckoutPage>
                   child: GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      setState(() => _selectedDate = date);
+                      setState(() {
+                        _selectedDate = date;
+                      });
+                      _fetchSlots();
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
@@ -927,76 +945,80 @@ class _CheckoutPageState extends State<CheckoutPage>
           // ── Time Slots ──
           _buildSectionTitle('Hora Disponible', isDark),
           const SizedBox(height: 15),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: List.generate(_timeSlots.length, (index) {
-              final isSelected = _selectedTimeSlot == index;
-              // Simulate some unavailable slots
-              final isUnavailable = index == 2 || index == 5 || index == 9;
+          if (_isLoadingSlots)
+            const Center(child: CircularProgressIndicator(color: Color(0xFFD48B41)))
+          else if (_timeSlots.isEmpty)
+            Text('Selecciona un barbero para ver horarios', style: GoogleFonts.outfit(color: Colors.grey))
+          else
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: List.generate(_timeSlots.length, (index) {
+                final isSelected = _selectedTimeSlot == index;
+                final isUnavailable = !_timeSlots[index]['isAvailable'];
 
-              return GestureDetector(
-                onTap: isUnavailable
-                    ? null
-                    : () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedTimeSlot = index);
-                      },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isUnavailable
-                        ? (isDark
-                            ? Colors.white.withOpacity(0.02)
-                            : Colors.grey.shade100)
-                        : isSelected
-                            ? const Color(0xFFD48B41)
-                            : (isDark
-                                ? const Color(0xFF1A1A1C)
-                                : Colors.white),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isUnavailable
-                          ? Colors.transparent
-                          : isSelected
-                              ? Colors.transparent
-                              : (isDark
-                                  ? Colors.white.withOpacity(0.06)
-                                  : Colors.black.withOpacity(0.06)),
+                return GestureDetector(
+                  onTap: isUnavailable
+                      ? null
+                      : () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedTimeSlot = index);
+                        },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFD48B41).withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Text(
-                    _timeSlots[index],
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    decoration: BoxDecoration(
                       color: isUnavailable
-                          ? Colors.grey.shade400
+                          ? (isDark
+                              ? Colors.white.withOpacity(0.02)
+                              : Colors.grey.shade100)
                           : isSelected
-                              ? Colors.white
+                              ? const Color(0xFFD48B41)
                               : (isDark
-                                  ? Colors.white.withOpacity(0.8)
-                                  : Colors.black87),
-                      decoration: isUnavailable
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
+                                  ? const Color(0xFF1A1A1C)
+                                  : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isUnavailable
+                            ? Colors.transparent
+                            : isSelected
+                                ? Colors.transparent
+                                : (isDark
+                                    ? Colors.white.withOpacity(0.06)
+                                    : Colors.black.withOpacity(0.06)),
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFFD48B41).withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Text(
+                      _timeSlots[index]['time'],
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isUnavailable
+                            ? Colors.grey.shade400
+                            : isSelected
+                                ? Colors.white
+                                : (isDark
+                                    ? Colors.white.withOpacity(0.8)
+                                    : Colors.black87),
+                        decoration: isUnavailable
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
                     ),
                   ),
-                ),
-              );
+                );
             }),
           ),
 
@@ -1028,6 +1050,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                 onTap: () {
                   HapticFeedback.selectionClick();
                   setState(() => _selectedBarber = index);
+                  _fetchSlots();
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -1279,8 +1302,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                         child: _buildConfirmInfoTile(
                           icon: Icons.schedule_rounded,
                           label: 'Hora',
-                          value: _selectedTimeSlot >= 0
-                              ? _timeSlots[_selectedTimeSlot]
+                          value: _selectedTimeSlot >= 0 && _timeSlots.isNotEmpty
+                              ? _timeSlots[_selectedTimeSlot]['time']
                               : '--',
                         ),
                       ),
@@ -1841,8 +1864,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                           const SizedBox(height: 16),
                           _buildSuccessDetailRow(
                             Icons.schedule_rounded,
-                            _selectedTimeSlot >= 0
-                                ? _timeSlots[_selectedTimeSlot]
+                            _selectedTimeSlot >= 0 && _timeSlots.isNotEmpty
+                                ? _timeSlots[_selectedTimeSlot]['time']
                                 : '',
                           ),
                           const SizedBox(height: 16),
