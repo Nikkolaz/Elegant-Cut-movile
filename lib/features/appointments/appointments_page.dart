@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../shared/widgets/rating_slider.dart';
 import '../../core/network/booking_api_service.dart';
+import 'reschedule_sheet.dart';
 
 class AppointmentsPage extends StatefulWidget {
   const AppointmentsPage({super.key});
@@ -32,6 +33,11 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     });
   }
 
+  Map<String, dynamic>? get _nextAppointment {
+    final pendings = _appointments.where((a) => a['estado'] == 'Pendiente').toList();
+    return pendings.isNotEmpty ? pendings.first : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -42,10 +48,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final double fullWidth = constraints.maxWidth;
-            final double horizontalPadding = 25.0;
-            final double contentWidth = fullWidth - (horizontalPadding * 2);
-
+            const double horizontalPadding = 25.0;
             return Stack(
               children: [
                 Column(
@@ -90,7 +93,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                                       return _buildHeaderSection(isDark);
                                     }
                                     final appointment = _appointments[index - 1];
-                                    return _buildAppointmentCard(appointment, isDark, contentWidth);
+                                    return _buildAppointmentCard(appointment, isDark);
                                   },
                                 ),
                     ),
@@ -169,6 +172,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   }
 
   Widget _buildHeaderSection(bool isDark) {
+    final next = _nextAppointment;
+    final String servicio = next?['servicio'] ?? 'Sin próxima cita';
+    final String fecha = next != null ? _formatDate(next['fecha']) : '';
+    final String hora = next?['hora'] ?? '';
+    final String estado = next?['estado'] ?? '';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Column(
@@ -200,46 +209,51 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         children: [
                           Text('Próxima cita', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFD48B41), letterSpacing: 1.2)),
                           const SizedBox(height: 10),
-                          Text('Corta & Diseña', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black, letterSpacing: -0.5)),
-                          const SizedBox(height: 6),
-                          Text('Hoy, 14:30', style: GoogleFonts.outfit(fontSize: 15, color: isDark ? Colors.grey.shade400 : Colors.black54)),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              _buildPill('3 servicios', isDark),
-                              const SizedBox(width: 10),
-                              _buildPill('Confirmada', isDark),
-                            ],
-                          ),
+                          Text(next != null ? servicio : 'Sin citas pendientes', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black, letterSpacing: -0.5)),
+                          if (next != null) ...[
+                            const SizedBox(height: 6),
+                            Text('$fecha, $hora', style: GoogleFonts.outfit(fontSize: 15, color: isDark ? Colors.grey.shade400 : Colors.black54)),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                _buildPill(estado, isDark),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => setState(() => _isIslandExpanded = !_isIslandExpanded),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: 60, height: _isIslandExpanded ? 120 : 60,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD48B41).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Transform.rotate(
-                              angle: _isIslandExpanded ? 0.5 : 0,
-                              child: const Icon(Icons.more_horiz_outlined, color: Color(0xFFD48B41), size: 20),
-                            ),
-                            if (_isIslandExpanded) ...[
-                              const SizedBox(height: 8),
-                              GestureDetector(onTap: () {}, child: const Icon(Icons.edit_outlined, color: Color(0xFFD48B41), size: 18)),
-                              const SizedBox(height: 8),
-                              GestureDetector(onTap: () {}, child: const Icon(Icons.close_outlined, color: Colors.redAccent, size: 18)),
+                    if (next != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _isIslandExpanded = !_isIslandExpanded),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: 60, height: _isIslandExpanded ? 120 : 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD48B41).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Transform.rotate(
+                                angle: _isIslandExpanded ? 0.5 : 0,
+                                child: const Icon(Icons.more_horiz_outlined, color: Color(0xFFD48B41), size: 20),
+                              ),
+                              if (_isIslandExpanded) ...[
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _isIslandExpanded = false);
+                                    _openRescheduleSheet(isDark, next);
+                                  },
+                                  child: const Icon(Icons.edit_outlined, color: Color(0xFFD48B41), size: 18),
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ],
@@ -253,6 +267,33 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     );
   }
 
+  void _openRescheduleSheet(bool isDark, Map<String, dynamic> appointment) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: RescheduleSheet(isDark: isDark, appointment: appointment),
+      ),
+    ).then((rescheduled) {
+      if (rescheduled == true) {
+        _fetchAppointments();
+      }
+    });
+  }
+
+  String _formatDate(dynamic fecha) {
+    if (fecha == null) return '';
+    try {
+      final date = DateTime.parse(fecha.toString());
+      final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return '${date.day} ${months[date.month - 1]}';
+    } catch (_) {
+      return fecha.toString();
+    }
+  }
+
   Widget _buildPill(String text, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -264,18 +305,15 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     );
   }
 
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment, bool isDark, double contentWidth) {
-    final infoIdx = _appointments.indexOf(appointment);
-    final List<Map<String, dynamic>> history = [
-      {'name': 'Corte Premium + Barba', 'barber': 'Carlos M.', 'date': '20 enero', 'price': r'$45', 'status': 'Completada'},
-      {'name': 'Sesión Facial', 'barber': 'Luis R.', 'date': '10 enero', 'price': r'$30', 'status': 'Completada'},
-      {'name': 'Corte Degradado', 'barber': 'Miguel A.', 'date': '28 dic', 'price': r'$35', 'status': 'Cancelada'},
-      {'name': 'Perfilado Barba', 'barber': 'Carlos M.', 'date': '15 dic', 'price': r'$20', 'status': 'Completada'},
-      {'name': 'Corte + Tinte', 'barber': 'Sofía G.', 'date': '5 dic', 'price': r'$75', 'status': 'Completada'},
-    ];
+  Widget _buildAppointmentCard(Map<String, dynamic> appointment, bool isDark) {
+    final String servicio = appointment['servicio'] ?? 'Servicio';
+    final String fecha = _formatDate(appointment['fecha']);
+    final String hora = appointment['hora'] ?? '';
+    final String precio = appointment['precio']?.toString() ?? '0';
+    final String estado = appointment['estado'] ?? 'Pendiente';
 
-    bool isCanceled = history[infoIdx]['status'] == 'Cancelada';
-    bool isCompleted = history[infoIdx]['status'] == 'Completada';
+    final bool isCanceled = estado == 'Cancelada';
+    final bool isCompleted = estado == 'Completada';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
@@ -286,7 +324,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => _RatingModal(isDark: isDark, historyItem: history[infoIdx]),
+              builder: (context) => _RatingModal(isDark: isDark, appointment: appointment),
             );
           }
         },
@@ -302,9 +340,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${infoIdx + 1}', style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                   Container(
-                    margin: const EdgeInsets.only(top: 5),
                     width: 40, height: 40,
                     decoration: BoxDecoration(
                       color: isCanceled ? Colors.red.withOpacity(0.1) : (isCompleted ? Colors.green.withOpacity(0.1) : const Color(0xFFD48B41).withOpacity(0.1)),
@@ -322,15 +358,15 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(history[infoIdx]['name'], style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
+                    Text(servicio, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
                     const SizedBox(height: 4),
-                    Text('${history[infoIdx]['barber']} • ${history[infoIdx]['date']}', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey.shade500)),
+                    Text('$fecha • $hora', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey.shade500)),
                   ],
                 ),
               ),
               Column(
                 children: [
-                  Text(history[infoIdx]['price'], style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black87)),
+                  Text('\$$precio', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black87)),
                   const SizedBox(height: 5),
                   if (isCompleted)
                     Container(
@@ -344,6 +380,15 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                       decoration: BoxDecoration(color: Colors.red.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
                       child: Text('Cancelada', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.red)),
                     ),
+                  if (!isCanceled && !isCompleted)
+                    GestureDetector(
+                      onTap: () => _openRescheduleSheet(isDark, appointment),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(color: const Color(0xFFD48B41).withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                        child: Text('Reprogramar', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFFD48B41))),
+                      ),
+                    ),
                 ],
               ),
             ],
@@ -356,9 +401,9 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
 
 class _RatingModal extends StatefulWidget {
   final bool isDark;
-  final Map<String, dynamic> historyItem;
+  final Map<String, dynamic> appointment;
 
-  const _RatingModal({required this.isDark, required this.historyItem});
+  const _RatingModal({required this.isDark, required this.appointment});
 
   @override
   State<_RatingModal> createState() => _RatingModalState();
@@ -366,7 +411,6 @@ class _RatingModal extends StatefulWidget {
 
 class _RatingModalState extends State<_RatingModal> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  double _ratingValue = 0.7;
 
   @override
   void initState() {
@@ -399,9 +443,9 @@ class _RatingModalState extends State<_RatingModal> with SingleTickerProviderSta
             const SizedBox(height: 20),
             Text('¿Cómo fue tu experiencia?', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: widget.isDark ? Colors.white : Colors.black)),
             const SizedBox(height: 8),
-            Text('${widget.historyItem['name']} con ${widget.historyItem['barber']}', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade500)),
+            Text('${widget.appointment['servicio']}', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade500)),
             const SizedBox(height: 30),
-            RatingSlider(onChanged: (val) { setState(() { _ratingValue = val; }); }),
+            RatingSlider(onChanged: (_) {}),
             const SizedBox(height: 30),
             TextField(
               style: GoogleFonts.outfit(color: widget.isDark ? Colors.white : Colors.black87),

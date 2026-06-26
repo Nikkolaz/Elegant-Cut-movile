@@ -65,6 +65,44 @@ class BookingApiService {
       return [];
     }
   }
+  Future<bool> rescheduleAppointment({
+    required int appointmentId,
+    required DateTime fecha,
+    required int idHorarios,
+    int? idEmpleado,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('id_usuario') ?? 1;
+
+      final dateStr = '${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}';
+
+      final body = {
+        'userId': userId,
+        'fecha': dateStr,
+        'id_horarios': idHorarios,
+      };
+
+      if (idEmpleado != null) {
+        body['id_empleado'] = idEmpleado;
+      }
+
+      final response = await _api.patch(
+        Uri.parse('${ApiConstants.baseUrl}/appointments/$appointmentId/reschedule'),
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      print('Error en rescheduleAppointment: ${response.statusCode} - ${response.body}');
+      return false;
+    } catch (e) {
+      print('BookingApiService error rescheduleAppointment: $e');
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getUserAppointments() async {
     try {
       final prefs = await SharedPreferences.getInstance();
