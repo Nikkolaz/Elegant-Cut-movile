@@ -84,8 +84,14 @@ class _ShopPageState extends State<ShopPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Tienda\nVirtual',
-                        style: GoogleFonts.outfit(fontSize: 42, fontWeight: FontWeight.w900, color: const Color(0xFF1E1E1E), height: 1.1, letterSpacing: -1.0),
+                        'Servicios',
+                        style: GoogleFonts.outfit(
+                          fontSize: 42,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF1E1E1E),
+                          height: 1.1,
+                          letterSpacing: -1.0,
+                        ),
                       ),
                       Transform.rotate(
                         angle: 0.1,
@@ -96,9 +102,19 @@ class _ShopPageState extends State<ShopPage> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      _buildInfoPill(Icons.shopping_bag_rounded, '${_products.length} Productos', const Color(0xFF2C2C2E), Colors.white),
+                      _buildInfoPill(
+                        Icons.shopping_bag_rounded,
+                        'Damas',
+                        const Color(0xFF2C2C2E),
+                        Colors.white,
+                      ),
                       const SizedBox(width: 15),
-                      _buildInfoPill(Icons.local_shipping_rounded, 'Envíos', Colors.white.withOpacity(0.3), const Color(0xFF1E1E1E)),
+                      _buildInfoPill(
+                        Icons.local_shipping_rounded,
+                        'Caballeros',
+                        Colors.white.withOpacity(0.3),
+                        const Color(0xFF1E1E1E),
+                      ),
                     ],
                   ),
                 ],

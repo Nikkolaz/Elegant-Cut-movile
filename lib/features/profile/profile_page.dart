@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_page.dart';
 import '../auth/login_page.dart';
+import '../../src/services/notification_service.dart';
 import '../booking/widgets/summary_card.dart';
 import '../appointments/appointments_page.dart';
 import 'tabs/cuts_history_tab.dart';
@@ -121,11 +122,13 @@ class _ProfilePageState extends State<ProfilePage>
         ),
         GestureDetector(
           onTap: () async {
+            await NotificationService().unregisterToken();
             await context.read<AuthProvider>().logout();
             final prefs = await SharedPreferences.getInstance();
             await prefs.remove('email');
             await prefs.remove('id_usuario');
             await prefs.remove('id_rol');
+            await prefs.remove('fcm_token');
             if (!mounted) return;
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginPage()), (r) => false);
           },
@@ -143,53 +146,7 @@ class _ProfilePageState extends State<ProfilePage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const AppointmentsPage(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.3, 0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-                  child: FadeTransition(
-                    opacity: Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-                    child: child,
-                  ),
-                );
-              },
-              transitionDuration: const Duration(milliseconds: 350),
-            ),
-          ),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.03) : const Color(0xFFD48B41).withOpacity(0.06),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFD48B41).withOpacity(0.15)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Citas', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500)),
-                    const SizedBox(height: 2),
-                    Text('12', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-                  ],
-                ),
-                const SizedBox(width: 8),
-                Icon(Icons.chevron_right, size: 18, color: const Color(0xFFD48B41)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        _buildStat(context, 'Puntos', '450'),
+        _buildStat(context, 'Citas', '12'),
         const Spacer(),
         _buildActionButton(context, Icons.ios_share),
         const SizedBox(width: 10),
@@ -232,15 +189,6 @@ class _ProfilePageState extends State<ProfilePage>
             value: '14:30',
             unit: 'Hoy',
             color: isDark ? const Color(0xFF1B5E20) : const Color(0xFFC8E6C9),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SummaryCard(
-            title: 'Puntos Club',
-            value: '450',
-            unit: 'pts',
-            color: isDark ? const Color(0xFFE65100) : const Color(0xFFFFCC80),
           ),
         ),
       ],

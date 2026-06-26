@@ -46,6 +46,9 @@ class AuthProvider extends ChangeNotifier {
         await prefs.setString('token', _token!);
         await prefs.setString('username', _username!);
         await prefs.setString('firstName', _firstName!);
+        await prefs.setInt('id_usuario', user?['id_usuario'] ?? user?['id'] ?? 0);
+        await prefs.setInt('id_rol', user?['id_rol'] ?? 2);
+        await prefs.setString('email', user?['email'] ?? '');
 
         _isLoggedIn = true;
         _isLoading = false;
@@ -83,6 +86,9 @@ class AuthProvider extends ChangeNotifier {
         await prefs.setString('token', _token!);
         await prefs.setString('username', _username!);
         await prefs.setString('firstName', _firstName!);
+        await prefs.setInt('id_usuario', user?['id_usuario'] ?? user?['id'] ?? 0);
+        await prefs.setInt('id_rol', user?['id_rol'] ?? 2);
+        await prefs.setString('email', user?['email'] ?? '');
 
         _isLoggedIn = true;
         _isLoading = false;

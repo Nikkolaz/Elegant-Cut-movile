@@ -1125,14 +1125,14 @@ class _CheckoutPageState extends State<CheckoutPage>
                         SizedBox(
                           width: double.infinity, height: 58,
                           child: ElevatedButton(
-                            onPressed: () { Navigator.pop(context); Navigator.pop(context); },
+                            onPressed: () { Navigator.popUntil(context, (route) => route.isFirst); },
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
                             child: Text('Volver al Inicio', style: GoogleFonts.outfit(fontWeight: FontWeight.w800, fontSize: 17)),
                           ),
                         ),
                         const SizedBox(height: 12),
                         TextButton(
-                          onPressed: () { Navigator.pop(context); Navigator.pop(context); },
+                          onPressed: () { Navigator.popUntil(context, (route) => route.isFirst); },
                           child: Text('Ver mis Citas', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFFD48B41))),
                         ),
                       ],

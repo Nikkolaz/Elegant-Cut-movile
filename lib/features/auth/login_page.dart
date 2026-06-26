@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'register_page.dart';
 import '../home/index_page.dart';
 import '../admin/admin_index_page.dart';
+import '../../src/services/notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../shared/widgets/carita_widget.dart';
 import '../../shared/widgets/custom_toast.dart';
@@ -64,6 +65,8 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (success) {
+      await NotificationService().registerAfterLogin();
+      if (!mounted) return;
       final prefs = await SharedPreferences.getInstance();
       final int idRol = prefs.getInt('id_rol') ?? 2;
 
@@ -111,6 +114,9 @@ class _LoginPageState extends State<LoginPage> {
 
           CustomToast.show(context, 'Inicio de sesión exitoso', ToastType.success);
 
+          await NotificationService().registerAfterLogin();
+
+          if (!mounted) return;
           if (idRol == 1) {
             Navigator.pushReplacement(
               context,
