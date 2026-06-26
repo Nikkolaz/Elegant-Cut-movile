@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_users_page.dart';
 import 'admin_appointments_page.dart';
@@ -48,45 +49,54 @@ class _AdminIndexPageState extends State<AdminIndexPage> {
       builder: (context, selectedIndex, _) {
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                NotificationListener<UserScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification.direction == ScrollDirection.reverse) {
-                      if (_isVisible.value) _isVisible.value = false;
-                    } else if (notification.direction == ScrollDirection.forward) {
-                      if (!_isVisible.value) _isVisible.value = true;
-                    }
-                    return false;
-                  },
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) => _selectedIndex.value = index,
-                    children: _pages,
-                  ),
+          body: Stack(
+            children: [
+              NotificationListener<UserScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.direction == ScrollDirection.reverse) {
+                    if (_isVisible.value) _isVisible.value = false;
+                  } else if (notification.direction == ScrollDirection.forward) {
+                    if (!_isVisible.value) _isVisible.value = true;
+                  }
+                  return false;
+                },
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (index) => _selectedIndex.value = index,
+                  children: _pages,
                 ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _isVisible,
-                  builder: (context, visible, _) {
-                    return AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      left: 0,
-                      right: 0,
-                      bottom: visible ? 0 : -100,
-                      child: Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: theme.scaffoldBackgroundColor,
-                          border: Border(
-                            top: BorderSide(
-                              color: isDark ? Colors.grey.shade900 : Colors.grey.withOpacity(0.1),
-                              width: 1,
-                            ),
+              ),
+              
+              // Animated Bottom Bar
+              ValueListenableBuilder<bool>(
+                valueListenable: _isVisible,
+                builder: (context, visible, _) {
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    left: 20,
+                    right: 20,
+                    bottom: visible ? MediaQuery.of(context).padding.bottom + 10 : -100,
+                    child: Container(
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xEE1C1C1E) : const Color(0xEEDFDFE3),
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
+                        ],
+                        border: Border.all(
+                          color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+                          width: 1.5,
                         ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -97,11 +107,11 @@ class _AdminIndexPageState extends State<AdminIndexPage> {
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         );
       },
@@ -111,26 +121,46 @@ class _AdminIndexPageState extends State<AdminIndexPage> {
   Widget _buildNavItem(IconData icon, String label, int index, int selectedIndex) {
     final bool isSelected = selectedIndex == index;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color color = isSelected
-        ? const Color(0xFFD48B41)
-        : (isDark ? Colors.grey.shade600 : Colors.grey.shade400);
+    final Color activeColor = const Color(0xFFD48B41);
+    final Color inactiveColor = isDark ? Colors.grey.shade500 : Colors.grey.shade600;
 
     return GestureDetector(
       onTap: () {
         _selectedIndex.value = index;
-        _pageController.animateToPage(index, duration: const Duration(milliseconds: 400), curve: Curves.easeInOutCubic);
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+        );
       },
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 70,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Nav item indicator & icon container
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? activeColor.withOpacity(0.12) : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? activeColor : inactiveColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: isSelected ? activeColor : inactiveColor,
+              fontSize: 10,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
