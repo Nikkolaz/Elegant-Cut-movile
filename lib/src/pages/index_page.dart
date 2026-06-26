@@ -102,7 +102,7 @@ class _IndexPageState extends State<IndexPage> {
                           children: [
                             _buildNavItem(context, Icons.home_filled, 'Inicio', 0, selectedIndex),
                             _buildNavItem(context, Icons.calendar_month, 'Citas', 1, selectedIndex),
-                            _buildNavItem(context, Icons.storefront, 'Tienda', 2, selectedIndex),
+                            _buildNavItem(context, Icons.storefront, 'Servicios', 2, selectedIndex),
                             _buildNavItem(
                               context,
                               Icons.face_retouching_natural,

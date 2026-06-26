@@ -88,7 +88,7 @@ class _ShopPageState extends State<ShopPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Tienda\nVirtual',
+                        'Servicios',
                         style: GoogleFonts.outfit(
                           fontSize: 42,
                           fontWeight: FontWeight.w900,
@@ -112,14 +112,14 @@ class _ShopPageState extends State<ShopPage> {
                     children: [
                       _buildInfoPill(
                         Icons.shopping_bag_rounded,
-                        '${_products.length} Productos',
+                        'Damas',
                         const Color(0xFF2C2C2E),
                         Colors.white,
                       ),
                       const SizedBox(width: 15),
                       _buildInfoPill(
                         Icons.local_shipping_rounded,
-                        'Envíos',
+                        'Caballeros',
                         Colors.white.withOpacity(0.3),
                         const Color(0xFF1E1E1E),
                       ),

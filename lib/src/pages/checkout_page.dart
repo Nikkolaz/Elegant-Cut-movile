@@ -1892,13 +1892,13 @@ class _CheckoutPageState extends State<CheckoutPage>
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: Column(
                       children: [
-                        SizedBox(
+                          SizedBox(
                           width: double.infinity,
                           height: 58,
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context); // Close dialog
-                              Navigator.pop(context); // Close checkout
+                              Navigator.of(context, rootNavigator: true)
+                                  .popUntil((route) => route.isFirst);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
@@ -1920,8 +1920,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                            Navigator.of(context, rootNavigator: true)
+                                .popUntil((route) => route.isFirst);
                           },
                           child: Text(
                             'Ver mis Citas',

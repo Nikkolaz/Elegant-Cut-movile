@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elegant_cut_mobile/src/pages/settings_page.dart';
 import 'package:elegant_cut_mobile/src/pages/login_page.dart';
+import 'package:elegant_cut_mobile/src/services/notification_service.dart';
 import 'package:elegant_cut_mobile/src/widgets/summary_card.dart';
 import 'package:elegant_cut_mobile/src/widgets/cuts_history_tab.dart';
 import 'package:elegant_cut_mobile/src/widgets/favorite_barbers_tab.dart';
@@ -152,12 +153,14 @@ class _ProfilePageState extends State<ProfilePage>
         // Botón logout compacto
         GestureDetector(
           onTap: () async {
+            await NotificationService().unregisterToken();
             final prefs = await SharedPreferences.getInstance();
             await prefs.remove('firstName');
             await prefs.remove('username');
             await prefs.remove('email');
             await prefs.remove('token');
             await prefs.remove('id_usuario');
+            await prefs.remove('fcm_token');
             if (!mounted) return;
             Navigator.pushAndRemoveUntil(context,
                 MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -180,8 +183,6 @@ class _ProfilePageState extends State<ProfilePage>
     return Row(
       children: [
         _buildStat(context, 'Citas', '12'),
-        const SizedBox(width: 28),
-        _buildStat(context, 'Puntos', '450'),
         const Spacer(),
         _buildActionButton(context, Icons.ios_share),
         const SizedBox(width: 10),
@@ -226,15 +227,6 @@ class _ProfilePageState extends State<ProfilePage>
             value: '14:30',
             unit: 'Hoy',
             color: isDark ? const Color(0xFF1B5E20) : const Color(0xFFC8E6C9),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SummaryCard(
-            title: 'Puntos Club',
-            value: '450',
-            unit: 'pts',
-            color: isDark ? const Color(0xFFE65100) : const Color(0xFFFFCC80),
           ),
         ),
       ],
