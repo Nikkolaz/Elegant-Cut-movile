@@ -1,6 +1,6 @@
+import 'package:elegant_cut_mobile/core/network/fcm_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:elegant_cut_mobile/src/api/fcm_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -21,7 +21,9 @@ class NotificationService {
     try {
       _messaging = FirebaseMessaging.instance;
       await _requestPermission();
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
 
       _messaging!.getToken().then((token) {
         if (token != null) _registerTokenIfNeeded(token);

@@ -4,7 +4,7 @@ import '../constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FcmApiService {
-  final ApiInterceptor _api = ApiInterceptor();
+  final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 10));
 
   Future<bool> registerToken(String fcmToken) async {
     try {

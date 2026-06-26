@@ -3,7 +3,7 @@ import 'api_middleware.dart';
 import '../constants/app_constants.dart';
 
 class PqrsApiService {
-  final ApiInterceptor _api = ApiInterceptor();
+  final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 10));
 
   Future<Map<String, dynamic>> createPqrs({
     required int idUsuario,
@@ -17,7 +17,6 @@ class PqrsApiService {
     try {
       final response = await _api.post(
         Uri.parse('${ApiConstants.baseUrl}/pqrs'),
-        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'id_usuario': idUsuario,
           'tipo_solicitud': tipoSolicitud,

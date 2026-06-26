@@ -3,7 +3,7 @@ import 'api_middleware.dart';
 import '../constants/app_constants.dart';
 
 class ReviewsApiService {
-  final ApiInterceptor _api = ApiInterceptor();
+  final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 10));
 
   Future<List<Map<String, dynamic>>> getReviews() async {
     try {
