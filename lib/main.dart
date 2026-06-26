@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:elegant_cut_mobile/src/theme/app_theme.dart';
-import 'package:elegant_cut_mobile/src/pages/splash_screen.dart';
-import 'package:elegant_cut_mobile/src/utils/constants.dart';
-
-// Notificador global para el tema de la aplicación (Por defecto claro como pidió el usuario)
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+import 'package:provider/provider.dart';
+import 'package:elegant_cut_mobile/core/theme/app_theme.dart';
+import 'package:elegant_cut_mobile/core/constants/app_constants.dart';
+import 'package:elegant_cut_mobile/features/splash/splash_screen.dart';
+import 'package:elegant_cut_mobile/state/theme_provider.dart';
+import 'package:elegant_cut_mobile/state/auth/auth_provider.dart';
+import 'package:elegant_cut_mobile/state/profile/profile_provider.dart';
+import 'package:elegant_cut_mobile/state/booking/booking_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Cargar preferencia de tema guardada
-  final prefs = await SharedPreferences.getInstance();
-  final isDarkMode = prefs.getBool('isDarkMode') ?? false; // Default: light (false)
-  themeNotifier.value = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-
   runApp(const MyApp());
 }
 
@@ -23,30 +18,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeNotifier,
-      builder: (context, currentMode, _) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: AppConstants.appName,
-
-          // Builder para ocultar el teclado en toda la app al tocar afuera
-          builder: (context, child) {
-            return GestureDetector(
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: child,
-            );
-          },
-
-          // Temas centralizados
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: currentMode,
-
-          // Página de inicio
-          home: const SplashScreen(),
-        );
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: AppConstants.appName,
+            builder: (context, child) {
+              return GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: child,
+              );
+            },
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const SplashScreen(),
+          );
+        },
+      ),
     );
   }
 }
