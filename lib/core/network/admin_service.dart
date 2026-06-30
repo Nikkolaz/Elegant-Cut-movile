@@ -185,6 +185,52 @@ class AdminService {
     }
   }
 
+  // ── Admin Reviews ──
+
+  Future<Map<String, dynamic>> getAllReviews({String? status}) async {
+    try {
+      final query = status != null ? '?status=$status' : '';
+      final url = Uri.parse('$_baseUrl/reviews/admin/all$query');
+      final response = await _api.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return {'success': true, 'data': decoded is List ? decoded : (decoded['data'] ?? decoded)};
+      }
+      return {'success': false, 'message': 'Error al cargar reseñas'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> changeReviewStatus(int id, int estado) async {
+    try {
+      final url = Uri.parse('$_baseUrl/reviews/admin/$id/status');
+      final response = await _api.patch(url, body: jsonEncode({'estado': estado}));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': estado == 1 ? 'Reseña aprobada' : 'Reseña ocultada'};
+      }
+      return {'success': false, 'message': 'Error al actualizar reseña'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteReview(int id) async {
+    try {
+      final url = Uri.parse('$_baseUrl/reviews/admin/$id');
+      final response = await _api.delete(url);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Reseña eliminada permanentemente'};
+      }
+      return {'success': false, 'message': 'Error al eliminar reseña'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
   Future<List<int>?> downloadStatsPdf() async {
     try {
       final url = Uri.parse('$_baseUrl/dashboard/stats/pdf');
