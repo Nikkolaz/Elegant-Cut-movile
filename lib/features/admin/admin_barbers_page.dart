@@ -53,9 +53,7 @@ class _AdminBarbersPageState extends State<AdminBarbersPage> {
     final isEdit = barberId != null;
     final Map<String, dynamic> response;
 
-    if (!isEdit) {
-      data['id_rol'] = 3;
-    }
+    // backend handles id_rol assignment
 
     if (isEdit) {
       response = await _adminService.updateBarber(barberId, data);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../shared/widgets/carita_widget.dart';
 import '../../state/booking/booking_provider.dart';
 import 'checkout_page.dart';
@@ -53,7 +54,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     final barbersCount = provider.barbers.length;
     final filteredServices = _selectedTab == 0
         ? allServices
-        : allServices.where((s) => s['category_id'] == _selectedTab).toList();
+        : allServices.where((s) {
+            final tabName = _tabsInfo[_selectedTab]['name'].toString().toLowerCase();
+            if (tabName == 'damas') {
+              return s['gender_id'] == 2;
+            } else if (tabName == 'cortes') {
+              return s['category'].toString().toLowerCase().contains('cabello') || 
+                     s['category'].toString().toLowerCase().contains('corte');
+            }
+            return s['category'].toString().toLowerCase().contains(tabName);
+          }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFB28A),
@@ -328,6 +338,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           boxShadow: isSelected
             ? [BoxShadow(color: bgColor.withOpacity(0.4), blurRadius: 15, offset: const Offset(0, 8))]
             : [],
+          image: (service['imageUrl'] != null && (service['imageUrl'] as String).isNotEmpty)
+              ? DecorationImage(
+                  image: CachedNetworkImageProvider(service['imageUrl']),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.45),
+                    BlendMode.darken,
+                  ),
+                )
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
