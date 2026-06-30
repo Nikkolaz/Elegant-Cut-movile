@@ -167,4 +167,60 @@ class AuthProvider extends ChangeNotifier {
     _firstName = null;
     _isLoggedIn = false;
   }
+
+  Future<bool> forgotPassword(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _authService.forgotPassword(email);
+
+      if (response['success'] == true) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = response['message'] ?? 'Error al solicitar recuperación';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error de conexión: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String codigo, String newPassword) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _authService.resetPassword(
+        email: email,
+        codigo: codigo,
+        newPassword: newPassword,
+      );
+
+      if (response['success'] == true) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = response['message'] ?? 'Error al restablecer contraseña';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error de conexión: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }

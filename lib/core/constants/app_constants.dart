@@ -9,7 +9,6 @@ class ApiConstants {
     } catch (_) {}
     return 'http://localhost:3001/api';
   }
-
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String checkToken = '/auth/check-token';

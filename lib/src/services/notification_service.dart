@@ -2,6 +2,7 @@ import 'package:elegant_cut_mobile/core/network/fcm_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Notificación en background: ${message.notification?.title}');
