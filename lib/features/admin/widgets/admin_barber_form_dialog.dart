@@ -112,7 +112,7 @@ class _AdminBarberFormDialogState extends State<AdminBarberFormDialog> {
 
     setState(() => _isLoading = true);
 
-    final data = {
+    final data = <String, dynamic>{
       'prim_nombre': _firstNameController.text.trim(),
       'seg_nombre': _secondNameController.text.trim(),
       'apellido1': _lastName1Controller.text.trim(),

@@ -6,6 +6,20 @@ class AdminService {
   final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 15));
   final String _baseUrl = ApiConstants.baseUrl;
 
+  String _extractErrorMessage(dynamic body, String fallback) {
+    if (body == null || body is! Map) return fallback;
+    final msg = body['message'];
+    if (msg == null) return fallback;
+    if (msg is String) return msg;
+    if (msg is List) return msg.join(', ');
+    if (msg is Map) {
+      if (msg['message'] is List) return (msg['message'] as List).join(', ');
+      if (msg['message'] is String) return msg['message'];
+      return 'Error de validación en los datos';
+    }
+    return msg.toString();
+  }
+
   Future<Map<String, dynamic>> getStats() async {
     try {
       final url = Uri.parse('$_baseUrl/dashboard/stats');
@@ -118,9 +132,7 @@ class AdminService {
       }
       return {
         'success': false,
-        'message': body['message'] is List
-            ? (body['message'] as List).join(', ')
-            : body['message'] ?? 'Error al crear barbero'
+        'message': _extractErrorMessage(body, 'Error al crear barbero')
       };
     } catch (e) {
       return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
@@ -138,9 +150,7 @@ class AdminService {
       }
       return {
         'success': false,
-        'message': body['message'] is List
-            ? (body['message'] as List).join(', ')
-            : body['message'] ?? 'Error al actualizar barbero'
+        'message': _extractErrorMessage(body, 'Error al actualizar barbero')
       };
     } catch (e) {
       return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
