@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_page.dart';
+import 'forgot_password_page.dart';
 import '../home/index_page.dart';
 import '../admin/admin_index_page.dart';
 import '../../src/services/notification_service.dart';
@@ -397,7 +398,25 @@ class _LoginPageState extends State<LoginPage> {
                                     isDark: isDark,
                                     obscure: true,
                                   ),
-                                  const SizedBox(height: 30),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                                        );
+                                      },
+                                      child: Text(
+                                        '¿Olvidaste tu contraseña?',
+                                        style: GoogleFonts.outfit(
+                                          color: const Color(0xFFD48B41),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
                                   SizedBox(
                                     width: double.infinity,
                                     height: 60,

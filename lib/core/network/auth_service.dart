@@ -130,4 +130,70 @@ class AuthService {
       return {'success': false, 'message': 'Error de conexión con Google'};
     }
   }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final url = Uri.parse('$_baseUrl/auth/forgot-password');
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'message': data['message'] ?? 'Código enviado al correo'};
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] is List
+              ? (data['message'] as List).join(', ')
+              : data['message'] ?? 'Error al solicitar recuperación'
+        };
+      }
+    } catch (e) {
+      print('Error en forgotPassword: $e');
+      return {'success': false, 'message': 'No se pudo conectar con el servidor'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String codigo,
+    required String newPassword,
+  }) async {
+    try {
+      final url = Uri.parse('$_baseUrl/auth/reset-password');
+      final response = await http
+          .put(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': email,
+              'codigo': codigo,
+              'newPassword': newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'message': data['message'] ?? 'Contraseña restablecida exitosamente'};
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] is List
+              ? (data['message'] as List).join(', ')
+              : data['message'] ?? 'Error al restablecer la contraseña'
+        };
+      }
+    } catch (e) {
+      print('Error en resetPassword: $e');
+      return {'success': false, 'message': 'No se pudo conectar con el servidor'};
+    }
+  }
 }
