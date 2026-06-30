@@ -35,8 +35,10 @@ class ServicesApiService {
             'price': s['precio']?.toString() ?? '0',
             'category': s['categorias']?['nombre'] ?? 'Servicio',
             'category_id': s['id_categoria'] ?? 1,
+            'gender_id': s['categorias']?['id_genero'] ?? 1, // 1 as fallback for Caballeros
             'description': s['descripcion'],
             'image': s['imagen'],
+            'imageUrl': s['imagen_url'],
             'bgColor': bgColor,
             'titleColor': isDarkBg ? Colors.white : const Color(0xFF1E1E1E),
             'iconData': Icons.content_cut_rounded,

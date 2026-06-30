@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../shared/widgets/carita_widget.dart';
+import '../../shared/widgets/barber_avatar.dart';
 import 'barber_detail_page.dart';
 import '../../core/network/barber_api_service.dart';
 
@@ -213,14 +213,11 @@ class _BarbersPageState extends State<BarbersPage> {
         child: Column(
         children: [
           const SizedBox(height: 15),
-          SizedBox(
-            width: 80,
-            height: 80,
-            child: CaritaWidget(
-              size: 80,
-              color: const Color(0xFF88C9F9),
-              expressionType: barber['expression'] ?? 0,
-            ),
+          BarberAvatar(
+            photoUrl: barber['photoUrl'],
+            size: 80,
+            caritaColor: const Color(0xFF88C9F9),
+            expressionType: barber['expression'] ?? 0,
           ),
           const SizedBox(height: 12),
           Text(
@@ -300,12 +297,11 @@ class _BarbersPageState extends State<BarbersPage> {
               color: const Color(0xFF88C9F9).withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: ClipOval(
-              child: CaritaWidget(
-                size: 60,
-                color: const Color(0xFF88C9F9),
-                expressionType: barber['expression'] ?? 0,
-              ),
+            child: BarberAvatar(
+              photoUrl: barber['photoUrl'],
+              size: 56,
+              caritaColor: const Color(0xFF88C9F9),
+              expressionType: barber['expression'] ?? 0,
             ),
           ),
           const SizedBox(width: 15),

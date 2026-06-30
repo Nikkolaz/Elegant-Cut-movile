@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../shared/widgets/carita_widget.dart';
 import '../../core/network/services_api_service.dart';
 import '../booking/checkout_page.dart';
@@ -14,14 +15,23 @@ class ShopPage extends StatefulWidget {
 
 class _ShopPageState extends State<ShopPage> {
   int _selectedCategory = 0;
+  int _selectedGender = 1; // 1 para Caballeros, 2 para Damas
   final List<Map<String, dynamic>> _selectedProducts = [];
 
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'Todos', 'icon': Icons.grid_view_rounded},
-    {'name': 'Cabello', 'icon': Icons.brush_rounded},
-    {'name': 'Barba', 'icon': Icons.face_rounded},
-    {'name': 'Accesorios', 'icon': Icons.watch_rounded},
-  ];
+  List<Map<String, dynamic>> get _currentCategories {
+    if (_selectedGender == 1) { // Caballeros
+      return [
+        {'name': 'Todos', 'icon': Icons.grid_view_rounded},
+        {'name': 'Cabello', 'icon': Icons.brush_rounded},
+        {'name': 'Barba', 'icon': Icons.face_rounded},
+      ];
+    } else { // Damas
+      return [
+        {'name': 'Todos', 'icon': Icons.grid_view_rounded},
+        {'name': 'Cabello', 'icon': Icons.brush_rounded},
+      ];
+    }
+  }
 
   List<Map<String, dynamic>> _products = [];
   bool _isLoading = true;
@@ -64,9 +74,16 @@ class _ShopPageState extends State<ShopPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final filteredProducts = _selectedCategory == 0
-        ? _products
-        : _products.where((p) => p['category'] == _selectedCategory).toList();
+    
+    // Filtro por género y categoría
+    var filteredProducts = _products.where((p) => p['gender_id'] == _selectedGender).toList();
+    
+    if (_selectedCategory != 0 && _selectedCategory < _currentCategories.length) {
+      final catName = _currentCategories[_selectedCategory]['name'].toString().toLowerCase();
+      filteredProducts = filteredProducts.where((p) => 
+        p['category'].toString().toLowerCase().contains(catName)
+      ).toList();
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFB28A),
@@ -102,18 +119,16 @@ class _ShopPageState extends State<ShopPage> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      _buildInfoPill(
+                      _buildGenderPill(
                         Icons.shopping_bag_rounded,
                         'Damas',
-                        const Color(0xFF2C2C2E),
-                        Colors.white,
+                        2,
                       ),
                       const SizedBox(width: 15),
-                      _buildInfoPill(
+                      _buildGenderPill(
                         Icons.local_shipping_rounded,
                         'Caballeros',
-                        Colors.white.withOpacity(0.3),
-                        const Color(0xFF1E1E1E),
+                        1,
                       ),
                     ],
                   ),
@@ -143,7 +158,7 @@ class _ShopPageState extends State<ShopPage> {
                         physics: const BouncingScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Row(
-                          children: _categories.asMap().entries.map((entry) {
+                          children: _currentCategories.asMap().entries.map((entry) {
                             final idx = entry.key;
                             final isSelected = _selectedCategory == idx;
                             return _AnimatedCategoryTab(
@@ -188,16 +203,29 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Widget _buildInfoPill(IconData icon, String text, Color bgColor, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(30)),
-      child: Row(
-        children: [
-          Icon(icon, color: textColor.withOpacity(0.7), size: 16),
-          const SizedBox(width: 10),
-          Text(text, style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
-        ],
+  Widget _buildGenderPill(IconData icon, String text, int genderId) {
+    final isSelected = _selectedGender == genderId;
+    final bgColor = isSelected ? const Color(0xFF2C2C2E) : Colors.white.withOpacity(0.3);
+    final textColor = isSelected ? Colors.white : const Color(0xFF1E1E1E);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedGender = genderId;
+          _selectedCategory = 0; // Reset category filter on gender change
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(30)),
+        child: Row(
+          children: [
+            Icon(icon, color: textColor.withOpacity(0.7), size: 16),
+            const SizedBox(width: 10),
+            Text(text, style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+          ],
+        ),
       ),
     );
   }
@@ -214,6 +242,16 @@ class _ShopPageState extends State<ShopPage> {
           borderRadius: BorderRadius.circular(40),
           border: isSelected ? Border.all(color: Colors.white.withOpacity(0.5), width: 3) : Border.all(color: Colors.transparent, width: 3),
           boxShadow: isSelected ? [BoxShadow(color: (product['bgColor'] as Color).withOpacity(0.4), blurRadius: 15, offset: const Offset(0, 8))] : [],
+          image: (product['imageUrl'] != null && (product['imageUrl'] as String).isNotEmpty)
+              ? DecorationImage(
+                  image: CachedNetworkImageProvider(product['imageUrl']),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.45),
+                    BlendMode.darken,
+                  ),
+                )
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

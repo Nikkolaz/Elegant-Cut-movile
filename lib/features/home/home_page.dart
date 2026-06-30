@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/network/barber_api_service.dart';
 import '../../core/network/reviews_api_service.dart';
-import '../../shared/widgets/carita_widget.dart';
+import '../../shared/widgets/barber_avatar.dart';
 import '../../shared/widgets/animated_logo_text.dart';
 import '../barbers/barber_detail_page.dart';
 import '../booking/book_appointment_page.dart';
@@ -533,6 +533,8 @@ class _HomePageState extends State<HomePage> {
                                   'reviews': exp['reviews'],
                                   'experience': exp['experience'],
                                   'isAvailable': exp['isAvailable'],
+                                  'photoUrl': exp['photoUrl'],
+                                  'portfolioPhotos': exp['portfolioPhotos'] ?? [],
                                 },
                               ),
                             ),
@@ -545,9 +547,10 @@ class _HomePageState extends State<HomePage> {
                               height: 65,
                               child: Hero(
                                 tag: 'barber_hero_${exp['name']}',
-                                child: CaritaWidget(
+                                child: BarberAvatar(
+                                  photoUrl: exp['photoUrl'],
                                   size: 65,
-                                  color: color,
+                                  caritaColor: color,
                                   expressionType: expression,
                                 ),
                               ),

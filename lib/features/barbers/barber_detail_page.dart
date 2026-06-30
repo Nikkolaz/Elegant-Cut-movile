@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../shared/widgets/carita_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../shared/widgets/barber_avatar.dart';
+import '../../shared/widgets/cloudinary_image.dart';
 import '../home/widgets/service_card.dart';
 import '../booking/book_appointment_page.dart';
 
@@ -18,6 +20,8 @@ class BarberDetailPage extends StatelessWidget {
 
     final Color barberColor = barber['color'] ?? const Color(0xFF98E68E);
     final int expression = barber['expression'] ?? 0;
+    final String? photoUrl = barber['photoUrl'];
+    final List<dynamic> portfolioPhotos = barber['portfolioPhotos'] ?? [];
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FB),
@@ -39,10 +43,13 @@ class BarberDetailPage extends StatelessWidget {
               child: Center(
                 child: Hero(
                   tag: 'barber_hero_${barber['name']}',
-                  child: CaritaWidget(
+                  child: BarberAvatar(
+                    photoUrl: photoUrl,
                     size: 180,
-                    color: barberColor,
+                    caritaColor: barberColor,
                     expressionType: expression,
+                    borderColor: const Color(0xFFD48B41),
+                    borderWidth: 3,
                   ),
                 ),
               ),
@@ -94,7 +101,7 @@ class BarberDetailPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Experto en Estilo & Barba',
+                      barber['specialty'] ?? 'Experto en Estilo & Barba',
                       style: GoogleFonts.outfit(
                         fontSize: 16,
                         color: Colors.grey,
@@ -112,13 +119,51 @@ class BarberDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Con más de 8 años de experiencia, me especializo en crear estilos únicos que resaltan tu personalidad. La precisión es mi firma.',
+                      barber['biography'] ?? 'Con más de 8 años de experiencia, me especializo en crear estilos únicos que resaltan tu personalidad. La precisión es mi firma.',
                       style: GoogleFonts.outfit(
                         fontSize: 15,
                         color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                         height: 1.5,
                       ),
                     ),
+
+                    // --- Galería del portafolio ---
+                    if (portfolioPhotos.isNotEmpty) ...[
+                      const SizedBox(height: 30),
+                      Text(
+                        'Portafolio',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        height: 160,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: portfolioPhotos.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: GestureDetector(
+                                onTap: () => _showFullImage(context, portfolioPhotos[index].toString()),
+                                child: CloudinaryImage(
+                                  imageUrl: portfolioPhotos[index].toString(),
+                                  width: 140,
+                                  height: 160,
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: 20,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 30),
                     Text(
                       'Servicios',
@@ -197,13 +242,38 @@ class BarberDetailPage extends StatelessWidget {
     );
   }
 
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(color: Color(0xFFD48B41)),
+              ),
+              errorWidget: (context, url, error) => const Center(
+                child: Icon(Icons.error_outline, color: Colors.white, size: 48),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStats(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildStatItem('Rating', '4.9', Icons.star, Colors.orange),
-        _buildStatItem('Exp.', '8 años', Icons.history, Colors.blue),
-        _buildStatItem('Citas', '1.2k', Icons.check_circle, Colors.green),
+        _buildStatItem('Rating', '${barber['rating'] ?? 4.9}', Icons.star, Colors.orange),
+        _buildStatItem('Exp.', barber['experience'] ?? '8 años', Icons.history, Colors.blue),
+        _buildStatItem('Reseñas', '${barber['reviews'] ?? 0}', Icons.check_circle, Colors.green),
       ],
     );
   }
