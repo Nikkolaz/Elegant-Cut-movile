@@ -5,6 +5,7 @@ import 'register_page.dart';
 import 'forgot_password_page.dart';
 import '../home/index_page.dart';
 import '../admin/admin_index_page.dart';
+import '../barber/barber_index_page.dart';
 import '../../src/services/notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../shared/widgets/carita_widget.dart';
@@ -78,6 +79,11 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => const AdminIndexPage()),
         );
+      } else if (idRol == 3) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BarberIndexPage()),
+        );
       } else {
         Navigator.pushReplacement(
           context,
@@ -122,6 +128,11 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const AdminIndexPage()),
+            );
+          } else if (idRol == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const BarberIndexPage()),
             );
           } else {
             Navigator.pushReplacement(

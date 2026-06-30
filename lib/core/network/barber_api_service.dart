@@ -3,7 +3,7 @@ import 'api_middleware.dart';
 import '../constants/app_constants.dart';
 
 class BarberApiService {
-  final ApiInterceptor _api = ApiInterceptor();
+  final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 10));
 
   Future<List<Map<String, dynamic>>> getBarbers() async {
     try {
@@ -26,6 +26,9 @@ class BarberApiService {
             'expression': 0,
             'isAvailable': b['estado'] == true,
             'status': b['estado'] == true ? 'Disponible' : 'Inactivo',
+            // --- Campos de imagen de Cloudinary ---
+            'photoUrl': b['foto_perfil_url'],
+            'portfolioPhotos': b['portafolios']?['fotos_portafolio_urls'] ?? [],
           };
         }).toList();
       } else {
@@ -52,6 +55,9 @@ class BarberApiService {
           'experience': b['portafolios']?['experiencia'] ?? '5 años',
           'biography': b['portafolios']?['biografia'] ?? 'Sin biografía.',
           'services': b['barberos_servicios'] ?? [],
+          // --- Campos de imagen de Cloudinary ---
+          'photoUrl': b['foto_perfil_url'],
+          'portfolioPhotos': b['portafolios']?['fotos_portafolio_urls'] ?? [],
         };
       }
       return null;
@@ -61,3 +67,4 @@ class BarberApiService {
     }
   }
 }
+

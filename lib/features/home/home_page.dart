@@ -4,13 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/network/barber_api_service.dart';
 import '../../core/network/reviews_api_service.dart';
-import '../../shared/widgets/carita_widget.dart';
+import '../../shared/widgets/barber_avatar.dart';
 import '../../shared/widgets/animated_logo_text.dart';
 import '../barbers/barber_detail_page.dart';
 import '../booking/book_appointment_page.dart';
 import '../shop/shop_page.dart';
+import 'create_review_page.dart';
 import '../booking/ubicacion_page.dart';
 import '../../core/network/booking_api_service.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -414,7 +416,20 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             const SizedBox(width: 20),
-            const Expanded(child: SizedBox()),
+            _buildActionCard(
+              'Crear Reseña',
+              'Califica tu servicio',
+              Icons.rate_review_outlined,
+              const Color(0xFFFFF4E5),
+              const Color(0xFFD48B41),
+              isDark,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CreateReviewPage()),
+                );
+              },
+            ),
           ],
         ),
       ],
@@ -533,6 +548,8 @@ class _HomePageState extends State<HomePage> {
                                   'reviews': exp['reviews'],
                                   'experience': exp['experience'],
                                   'isAvailable': exp['isAvailable'],
+                                  'photoUrl': exp['photoUrl'],
+                                  'portfolioPhotos': exp['portfolioPhotos'] ?? [],
                                 },
                               ),
                             ),
@@ -545,9 +562,10 @@ class _HomePageState extends State<HomePage> {
                               height: 65,
                               child: Hero(
                                 tag: 'barber_hero_${exp['name']}',
-                                child: CaritaWidget(
+                                child: BarberAvatar(
+                                  photoUrl: exp['photoUrl'],
                                   size: 65,
-                                  color: color,
+                                  caritaColor: color,
                                   expressionType: expression,
                                 ),
                               ),

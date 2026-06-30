@@ -3,7 +3,7 @@ import 'api_middleware.dart';
 import '../constants/app_constants.dart';
 
 class ReviewsApiService {
-  final ApiInterceptor _api = ApiInterceptor();
+  final ApiInterceptor _api = ApiInterceptor(timeout: const Duration(seconds: 10));
 
   Future<List<Map<String, dynamic>>> getReviews() async {
     try {
@@ -31,6 +31,32 @@ class ReviewsApiService {
     } catch (e) {
       print('ReviewsApiService error: $e');
       return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> createReview({
+    required int rating,
+    required String comment,
+    int? idBarbero,
+    required int idCliente,
+  }) async {
+    try {
+      final response = await _api.post(
+        Uri.parse('${ApiConstants.baseUrl}/reviews'),
+        body: jsonEncode({
+          'calificacion': rating,
+          'comentario': comment,
+          'id_barbero': idBarbero,
+          'id_cliente': idCliente,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'message': 'Reseña enviada con éxito'};
+      }
+      return {'success': false, 'message': 'Error al enviar reseña: ${response.statusCode}'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
     }
   }
 
