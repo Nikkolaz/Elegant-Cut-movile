@@ -34,6 +34,32 @@ class ReviewsApiService {
     }
   }
 
+  Future<Map<String, dynamic>> createReview({
+    required int rating,
+    required String comment,
+    int? idBarbero,
+    required int idCliente,
+  }) async {
+    try {
+      final response = await _api.post(
+        Uri.parse('${ApiConstants.baseUrl}/reviews'),
+        body: jsonEncode({
+          'calificacion': rating,
+          'comentario': comment,
+          'id_barbero': idBarbero,
+          'id_cliente': idCliente,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'message': 'Reseña enviada con éxito'};
+      }
+      return {'success': false, 'message': 'Error al enviar reseña: ${response.statusCode}'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
   String _formatDate(String? isoDate) {
     if (isoDate == null) return 'Recientemente';
     try {

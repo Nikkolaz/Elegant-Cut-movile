@@ -6,11 +6,13 @@ import '../../core/network/booking_api_service.dart';
 class RescheduleSheet extends StatefulWidget {
   final bool isDark;
   final Map<String, dynamic> appointment;
+  final bool isBarber;
 
   const RescheduleSheet({
     super.key,
     required this.isDark,
     required this.appointment,
+    this.isBarber = false,
   });
 
   @override
@@ -57,13 +59,21 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
     HapticFeedback.heavyImpact();
     setState(() => _isSubmitting = true);
 
-    final success = await _bookingApi.rescheduleAppointment(
-      appointmentId: widget.appointment['id'],
-      fecha: _selectedDate,
-      idHorarios: _timeSlots[_selectedTimeSlot]['id'] is int
-          ? _timeSlots[_selectedTimeSlot]['id']
-          : int.parse(_timeSlots[_selectedTimeSlot]['id'].toString()),
-    );
+    final success = widget.isBarber
+        ? await _bookingApi.barberRescheduleAppointment(
+            appointmentId: widget.appointment['id'],
+            date: _selectedDate,
+            idHorarios: _timeSlots[_selectedTimeSlot]['id'] is int
+                ? _timeSlots[_selectedTimeSlot]['id']
+                : int.parse(_timeSlots[_selectedTimeSlot]['id'].toString()),
+          )
+        : await _bookingApi.rescheduleAppointment(
+            appointmentId: widget.appointment['id'],
+            fecha: _selectedDate,
+            idHorarios: _timeSlots[_selectedTimeSlot]['id'] is int
+                ? _timeSlots[_selectedTimeSlot]['id']
+                : int.parse(_timeSlots[_selectedTimeSlot]['id'].toString()),
+          );
 
     if (mounted) {
       setState(() => _isSubmitting = false);
