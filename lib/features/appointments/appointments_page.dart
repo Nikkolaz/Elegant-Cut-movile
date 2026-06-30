@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../shared/widgets/rating_slider.dart';
 import '../../core/network/booking_api_service.dart';
 import 'reschedule_sheet.dart';
+import '../home/create_review_page.dart';
+
 
 class AppointmentsPage extends StatefulWidget {
   const AppointmentsPage({super.key});
@@ -320,12 +322,18 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       child: GestureDetector(
         onTap: () {
           if (isCompleted) {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => _RatingModal(isDark: isDark, appointment: appointment),
-            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateReviewPage(
+                  initialBarberId: appointment['barber_id'],
+                ),
+              ),
+            ).then((value) {
+              if (value == true) {
+                _fetchAppointments();
+              }
+            });
           }
         },
         child: Container(
