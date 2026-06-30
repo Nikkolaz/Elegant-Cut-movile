@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_users_page.dart';
 import 'admin_appointments_page.dart';
+import 'admin_reviews_page.dart';
 import '../profile/profile_page.dart';
 
 class AdminIndexPage extends StatefulWidget {
@@ -27,6 +28,7 @@ class _AdminIndexPageState extends State<AdminIndexPage> {
       const AdminDashboardPage(),
       const AdminUsersPage(),
       const AdminAppointmentsPage(),
+      const AdminReviewsPage(),
       ProfilePage(),
     ];
   }
@@ -103,7 +105,8 @@ class _AdminIndexPageState extends State<AdminIndexPage> {
                             _buildNavItem(Icons.dashboard_rounded, 'Dashboard', 0, selectedIndex),
                             _buildNavItem(Icons.people_alt_rounded, 'Usuarios', 1, selectedIndex),
                             _buildNavItem(Icons.calendar_month_rounded, 'Citas', 2, selectedIndex),
-                            _buildNavItem(Icons.person_rounded, 'Perfil', 3, selectedIndex),
+                            _buildNavItem(Icons.reviews_rounded, 'Reseñas', 3, selectedIndex),
+                            _buildNavItem(Icons.person_rounded, 'Perfil', 4, selectedIndex),
                           ],
                         ),
                       ),
