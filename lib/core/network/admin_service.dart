@@ -315,5 +315,97 @@ class AdminService {
       return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
     }
   }
+
+  // ── Gestión de Servicios ──
+
+  Future<Map<String, dynamic>> getAdminServices() async {
+    try {
+      final url = Uri.parse('$_baseUrl/services/admin/all');
+      final response = await _api.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded is Map && decoded.containsKey('data')
+            ? decoded['data']
+            : (decoded is List ? decoded : []);
+        return {'success': true, 'data': data};
+      }
+      return {'success': false, 'message': 'Error al cargar servicios'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> getServiceCategories() async {
+    try {
+      final url = Uri.parse('$_baseUrl/services/categories');
+      final response = await _api.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded is Map && decoded.containsKey('data')
+            ? decoded['data']
+            : (decoded is List ? decoded : []);
+        return {'success': true, 'data': data};
+      }
+      return {'success': false, 'message': 'Error al cargar categorías'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> createService(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse('$_baseUrl/services');
+      final response = await _api.post(url, body: jsonEncode(data));
+
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': body, 'message': 'Servicio creado con éxito'};
+      }
+      return {
+        'success': false,
+        'message': _extractErrorMessage(body, 'Error al crear servicio'),
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateService(int id, Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse('$_baseUrl/services/$id');
+      final response = await _api.patch(url, body: jsonEncode(data));
+
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': body, 'message': 'Servicio actualizado con éxito'};
+      }
+      return {
+        'success': false,
+        'message': _extractErrorMessage(body, 'Error al actualizar servicio'),
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteService(int id) async {
+    try {
+      final url = Uri.parse('$_baseUrl/services/$id');
+      final response = await _api.delete(url);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Servicio eliminado con éxito'};
+      }
+      final body = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': _extractErrorMessage(body, 'Error al eliminar servicio'),
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
 }
 
