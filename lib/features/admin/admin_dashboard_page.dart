@@ -31,7 +31,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final statsResponse = await _adminService.getStats();
       final activityResponse = await _adminService.getActivity();
@@ -67,7 +67,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       final pdfBytes = await _adminService.downloadStatsPdf();
       if (pdfBytes == null || pdfBytes.isEmpty) {
         if (mounted) {
-          CustomToast.show(context, 'No se pudo generar el reporte PDF. Verifica la conexión con el servidor.', ToastType.error);
+          CustomToast.show(
+            context,
+            'No se pudo generar el reporte PDF. Verifica la conexión con el servidor.',
+            ToastType.error,
+          );
         }
         return;
       }
@@ -78,12 +82,20 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       await file.writeAsBytes(pdfBytes);
 
       if (mounted) {
-        CustomToast.show(context, 'Reporte descargado con éxito', ToastType.success);
+        CustomToast.show(
+          context,
+          'Reporte descargado con éxito',
+          ToastType.success,
+        );
         await OpenFilex.open(file.path);
       }
     } catch (e) {
       if (mounted) {
-        CustomToast.show(context, 'Error al descargar el reporte: ${e.toString().replaceAll("Exception: ", "")}', ToastType.error);
+        CustomToast.show(
+          context,
+          'Error al descargar el reporte: ${e.toString().replaceAll("Exception: ", "")}',
+          ToastType.error,
+        );
       }
     } finally {
       if (mounted) {
@@ -114,145 +126,171 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: isDark ? Colors.white : Colors.black),
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? Colors.white : Colors.black,
+            ),
             onPressed: _loadData,
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFD48B41)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFD48B41)),
+            )
           : RefreshIndicator(
               onRefresh: _loadData,
               color: primaryGold,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Welcome & status banner
-                    _buildWelcomeCard(isDark),
-                    const SizedBox(height: 25),
-                    
-                    // Metrics Title
-                    Text(
-                      'Métricas de Hoy',
-                      style: GoogleFonts.outfit(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
+                  children:
+                      [
+                            // Welcome & status banner
+                            _buildWelcomeCard(isDark),
+                            const SizedBox(height: 25),
 
-                    // Grid of Metrics
-                    Row(
-                      children: [
-                        _buildStatCard(
-                          title: 'Citas Hoy',
-                          value: '${_stats?['citasHoy'] ?? 0}',
-                          icon: Icons.calendar_today_rounded,
-                          color: const Color(0xFF50C878),
-                          isDark: isDark,
-                        ),
-                        const SizedBox(width: 15),
-                        _buildStatCard(
-                          title: 'Ingresos Hoy',
-                          value: '\$${_stats?['ingresosHoy'] ?? 0}',
-                          icon: Icons.payments_rounded,
-                          color: primaryGold,
-                          isDark: isDark,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        _buildStatCard(
-                          title: 'Clientes Nuevos',
-                          value: '${_stats?['clientesNuevos'] ?? 0}',
-                          icon: Icons.person_add_rounded,
-                          color: const Color(0xFF4A90E2),
-                          isDark: isDark,
-                        ),
-                        const SizedBox(width: 15),
-                        _buildStatCard(
-                          title: 'Citas Pendientes',
-                          value: '${_stats?['citasPendientes'] ?? 0}',
-                          icon: Icons.hourglass_empty_rounded,
-                          color: const Color(0xFFFF9500),
-                          isDark: isDark,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
+                            // Metrics Title
+                            Text(
+                              'Métricas de Hoy',
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
 
-                    // Quick Actions
-                    Text(
-                      'Acciones Rápidas',
-                      style: GoogleFonts.outfit(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    _buildQuickAction(
-                      title: 'Gestionar Barberos',
-                      subtitle: 'Registrar, editar y activar barberos',
-                      icon: Icons.content_cut_rounded,
-                      color: primaryGold,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AdminBarbersPage()),
-                        );
-                      },
-                    ),
-                    _buildQuickAction(
-                      title: 'Gestionar Administradores',
-                      subtitle: 'Registrar, editar y activar administradores',
-                      icon: Icons.admin_panel_settings_rounded,
-                      color: primaryGold,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AdminAdministratorsPage()),
-                        );
-                      },
-                    ),
-                    _buildQuickAction(
-                      title: 'Descargar Reporte PDF',
-                      subtitle: 'Estadísticas e historial general en PDF',
-                      icon: Icons.picture_as_pdf_rounded,
-                      color: const Color(0xFFFF3B30),
-                      isDark: isDark,
-                      isLoading: _isDownloadingPdf,
-                      onTap: _downloadReport,
-                    ),
-                    const SizedBox(height: 25),
+                            // Grid of Metrics
+                            Row(
+                              children: [
+                                _buildStatCard(
+                                  title: 'Citas Hoy',
+                                  value: '${_stats?['citasHoy'] ?? 0}',
+                                  icon: Icons.calendar_today_rounded,
+                                  color: const Color(0xFF50C878),
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(width: 15),
+                                _buildStatCard(
+                                  title: 'Ingresos Hoy',
+                                  value: '\$${_stats?['ingresosHoy'] ?? 0}',
+                                  icon: Icons.payments_rounded,
+                                  color: primaryGold,
+                                  isDark: isDark,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                _buildStatCard(
+                                  title: 'Clientes Nuevos',
+                                  value: '${_stats?['clientesNuevos'] ?? 0}',
+                                  icon: Icons.person_add_rounded,
+                                  color: const Color(0xFF4A90E2),
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(width: 15),
+                                _buildStatCard(
+                                  title: 'Citas Pendientes',
+                                  value: '${_stats?['citasPendientes'] ?? 0}',
+                                  icon: Icons.hourglass_empty_rounded,
+                                  color: const Color(0xFFFF9500),
+                                  isDark: isDark,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 25),
 
-                    // Recent Activity
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Actividad Reciente',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const Icon(Icons.history_rounded, size: 20, color: Colors.grey),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    _buildRecentActivityList(isDark),
-                    const SizedBox(height: 30),
-                  ].animate(interval: 60.ms).fade(duration: 350.ms).slideY(begin: 0.05, curve: Curves.easeOut),
+                            // Quick Actions
+                            Text(
+                              'Acciones Rápidas',
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            _buildQuickAction(
+                              title: 'Gestionar Barberos',
+                              subtitle: 'Registrar, editar y activar barberos',
+                              icon: Icons.content_cut_rounded,
+                              color: primaryGold,
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdminBarbersPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildQuickAction(
+                              title: 'Gestionar Administradores',
+                              subtitle:
+                                  'Registrar, editar y activar administradores',
+                              icon: Icons.admin_panel_settings_rounded,
+                              color: primaryGold,
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdminAdministratorsPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildQuickAction(
+                              title: 'Descargar Reporte PDF',
+                              subtitle:
+                                  'Estadísticas e historial general en PDF',
+                              icon: Icons.picture_as_pdf_rounded,
+                              color: const Color(0xFFFF3B30),
+                              isDark: isDark,
+                              isLoading: _isDownloadingPdf,
+                              onTap: _downloadReport,
+                            ),
+                            const SizedBox(height: 25),
+
+                            // Recent Activity
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Actividad Reciente',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.history_rounded,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            _buildRecentActivityList(isDark),
+                            const SizedBox(height: 30),
+                          ]
+                          .animate(interval: 60.ms)
+                          .fade(duration: 350.ms)
+                          .slideY(begin: 0.05, curve: Curves.easeOut),
                 ),
               ),
             ),
@@ -273,7 +311,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: isDark ? const Color(0xFFD48B41).withOpacity(0.2) : Colors.grey.shade200,
+          color: isDark
+              ? const Color(0xFFD48B41).withOpacity(0.2)
+              : Colors.grey.shade200,
           width: 1.5,
         ),
       ),
@@ -283,7 +323,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           Row(
             children: [
               Text(
-                'Hola, Administrador 👋',
+                'Hola, Administrador',
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -358,7 +398,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               color: Colors.black.withOpacity(0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: Column(
@@ -409,7 +449,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -430,7 +472,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       ? SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: color, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: color,
+                            strokeWidth: 2,
+                          ),
                         )
                       : Icon(icon, color: color, size: 24),
                 ),
@@ -458,7 +503,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Colors.grey,
+                ),
               ],
             ),
           ),
@@ -475,7 +524,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
+          border: Border.all(
+            color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
+          ),
         ),
         child: Center(
           child: Text(
@@ -492,12 +543,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       itemCount: _recentActivities.length > 5 ? 5 : _recentActivities.length,
       itemBuilder: (context, index) {
         final activity = _recentActivities[index];
-        final clientName = activity['usuarios'] != null 
+        final clientName = activity['usuarios'] != null
             ? '${activity['usuarios']['prim_nombre'] ?? ''} ${activity['usuarios']['apellido1'] ?? ''}'
             : 'Cliente';
-        
+
         final statusId = activity['id_estado_cita'] ?? 1;
-        
+
         String statusText = 'Pendiente';
         Color statusColor = const Color(0xFFD48B41);
         if (statusId == 2) {
@@ -525,7 +576,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? Colors.grey.shade900 : Colors.grey.shade200),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
+            ),
           ),
           child: Row(
             children: [

@@ -26,7 +26,11 @@ class AdminService {
       final response = await _api.get(url);
 
       if (response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
+        final decoded = jsonDecode(response.body);
+        return {
+          'success': true,
+          'data': decoded is Map && decoded.containsKey('data') ? decoded['data'] : decoded
+        };
       }
       return {'success': false, 'message': 'Error al cargar estadísticas'};
     } catch (e) {
