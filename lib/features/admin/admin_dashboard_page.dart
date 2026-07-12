@@ -7,6 +7,7 @@ import 'package:open_filex/open_filex.dart';
 import '../../core/network/admin_service.dart';
 import '../../shared/widgets/custom_toast.dart';
 import 'admin_barbers_page.dart';
+import 'admin_administrators_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -206,6 +207,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const AdminBarbersPage()),
+                        );
+                      },
+                    ),
+                    _buildQuickAction(
+                      title: 'Gestionar Administradores',
+                      subtitle: 'Registrar, editar y activar administradores',
+                      icon: Icons.admin_panel_settings_rounded,
+                      color: primaryGold,
+                      isDark: isDark,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminAdministratorsPage()),
                         );
                       },
                     ),

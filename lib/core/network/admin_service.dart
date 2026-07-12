@@ -244,4 +244,72 @@ class AdminService {
       return null;
     }
   }
+
+  // ── Gestión de Administradores ──
+
+  Future<Map<String, dynamic>> getAdministrators() async {
+    try {
+      final url = Uri.parse('$_baseUrl/admin/administrators');
+      final response = await _api.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return {'success': true, 'data': decoded is List ? decoded : (decoded['data'] ?? decoded)};
+      }
+      return {'success': false, 'message': 'Error al cargar administradores'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> createAdmin(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse('$_baseUrl/admin/administrators');
+      final response = await _api.post(url, body: jsonEncode(data));
+
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': body, 'message': 'Administrador creado con éxito'};
+      }
+      return {
+        'success': false,
+        'message': _extractErrorMessage(body, 'Error al crear administrador')
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateAdmin(int id, Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse('$_baseUrl/admin/administrators/$id');
+      final response = await _api.patch(url, body: jsonEncode(data));
+
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': body, 'message': 'Administrador actualizado con éxito'};
+      }
+      return {
+        'success': false,
+        'message': _extractErrorMessage(body, 'Error al actualizar administrador')
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> toggleAdminStatus(int id) async {
+    try {
+      final url = Uri.parse('$_baseUrl/admin/administrators/$id/toggle');
+      final response = await _api.put(url);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return {'success': false, 'message': 'Error al cambiar estado del administrador'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: ${e.toString().replaceAll("Exception: ", "")}'};
+    }
+  }
 }
+
