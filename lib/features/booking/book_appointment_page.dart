@@ -16,17 +16,7 @@ class BookAppointmentPage extends StatefulWidget {
 
 class _BookAppointmentPageState extends State<BookAppointmentPage> {
   int _selectedTab = 0;
-  final List<Map<String, dynamic>> _selectedServices = [];
 
-  void _toggleService(Map<String, dynamic> service) {
-    setState(() {
-      if (_selectedServices.contains(service)) {
-        _selectedServices.remove(service);
-      } else {
-        _selectedServices.add(service);
-      }
-    });
-  }
 
   final List<Map<String, dynamic>> _tabsInfo = [
     {'name': 'Todos', 'icon': Icons.grid_view_rounded},
@@ -204,14 +194,14 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                         ))
                       else
                         ...filteredServices.map((service) {
-                          final isSelected = _selectedServices.contains(service);
+                          final isSelected = provider.isServiceSelected(service);
                           return Padding(
                             padding: const EdgeInsets.only(left: 25, right: 25, bottom: 20),
                             child: _buildServiceCard(
                               context: context,
                               service: service,
                               isSelected: isSelected,
-                              onTap: () => _toggleService(service),
+                              onTap: () => provider.toggleService(service),
                             ),
                           );
                         }),
@@ -236,7 +226,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            bottom: _selectedServices.isNotEmpty ? 50 : -120,
+            bottom: provider.selectedServices.isNotEmpty ? 50 : -120,
             left: 20,
             right: 20,
             child: _buildCartBar(),
@@ -247,7 +237,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   }
 
   Widget _buildCartBar() {
-    final total = context.read<BookingProvider>().total;
+    final provider = context.read<BookingProvider>();
+    final total = provider.total;
     return Container(
       height: 85,
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
@@ -270,7 +261,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_selectedServices.length} servicio${_selectedServices.length > 1 ? 's' : ''}',
+                '${provider.selectedServices.length} servicio${provider.selectedServices.length > 1 ? 's' : ''}',
                 style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13),
               ),
               Text(
@@ -285,8 +276,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CheckoutPage(
-                    products: _selectedServices,
-                    total: context.read<BookingProvider>().total,
+                    products: provider.selectedServices,
+                    total: total,
                     isServiceBooking: true,
                     preSelectedBarberName: widget.preselectedBarber?['name'],
                   ),
